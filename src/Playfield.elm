@@ -2,9 +2,9 @@ module Playfield exposing (..)
 
 import Array exposing (Array, repeat)
 import Shape exposing (Shape, cellPositions, shapeSize)
-import Tetromino exposing (Tetromino(..), TetrominoCommand(..), moveTetrominoDown, moveTetrominoLeft, moveTetrominoRight)
+import Tetromino exposing (Tetromino(..), TetrominoCommand(..), moveTetrominoDown, moveTetrominoLeft, moveTetrominoRight, tetrominoPositions)
 
-type Cell = Empty | Moving
+type Cell = Empty | Moving | Fixed
 type alias Row = Array Cell
 type alias Grid = Array Row
 type PlayField = PlayableField Tetromino Grid | FullField Grid
@@ -17,11 +17,11 @@ updateRow = Array.set
 
 countCellAtState : Cell -> List (Int, Int) -> Grid -> Int
 countCellAtState state positions grid =
-    List.map (\pos -> if ((getCellState pos grid) == (Just state)) then 1 else 0) positions
+    List.map (\pos -> if ((getCellState grid pos) == (Just state)) then 1 else 0) positions
         |> List.sum
 
-getCellState : (Int, Int) -> Grid -> Maybe Cell
-getCellState (i,j) grid = Array.get i grid |> Maybe.andThen (Array.get j)
+getCellState : Grid -> (Int, Int) -> Maybe Cell
+getCellState grid (i,j) = Array.get i grid |> Maybe.andThen (Array.get j)
 
 setCellState : Cell -> (Int, Int) -> Grid -> Grid
 setCellState state (i,j) grid =
@@ -41,22 +41,27 @@ retrieveGrid field = case field of
      (PlayableField _ grid) -> grid
      (FullField grid) -> grid
 
+retrieveTetromino : PlayField -> Maybe Tetromino
+retrieveTetromino field = case field of
+     (PlayableField tetromino _) -> Just tetromino
+     (FullField _) -> Nothing
+
+isPossiblePosition : Tetromino -> Grid -> Bool
+isPossiblePosition tetromino grid = (countCellAtState Empty (tetrominoPositions tetromino) grid) == 4
+
 spawnTetromino :  Shape -> Grid -> PlayField
 spawnTetromino shape grid =
     let
         columnPos = if (shapeSize shape) == 3 then 4 else 3
-        tetromino = (Tetromino.Tetromino shape (0 , columnPos))
-        updatedGrid = placeMovingTetromino tetromino grid
+        tetromino = Tetromino.Tetromino shape (0 , columnPos)
      in
-        updatedGrid |> Maybe.map (PlayableField tetromino) |> Maybe.withDefault (FullField grid)
+        if (isPossiblePosition tetromino grid)
+            then PlayableField tetromino (projectTetrominoToGrid Moving tetromino grid)
+            else FullField grid
 
-placeMovingTetromino : Tetromino -> Grid -> Maybe Grid
-placeMovingTetromino (Tetromino shape (i,j)) grid =
-    let
-        movingPositions = List.map (\(ii,jj) -> (ii + i, jj + j))  (cellPositions shape)
-        updatedGrid = List.foldl (setCellState Moving) grid movingPositions
-    in
-        Just updatedGrid
+projectTetrominoToGrid : Cell -> Tetromino -> Grid -> Grid
+projectTetrominoToGrid cell tetromino grid =
+    List.foldl (setCellState cell) grid (tetrominoPositions tetromino)
 
 moveTetrominoOnGrid : TetrominoCommand -> Tetromino -> Grid -> PlayField
 moveTetrominoOnGrid command tetromino grid =
@@ -65,15 +70,21 @@ moveTetrominoOnGrid command tetromino grid =
             MoveDown -> moveTetrominoDown tetromino
             MoveLeft -> moveTetrominoLeft tetromino
             MoveRight -> moveTetrominoRight tetromino
-        updatedGrid =  placeMovingTetromino movedTetromino grid
+        cleanedGrid = projectTetrominoToGrid Empty tetromino grid
     in
-        updatedGrid
-            |> Maybe.map (PlayableField movedTetromino)
-            |> Maybe.withDefault  (PlayableField tetromino grid)
+        if (isPossiblePosition movedTetromino cleanedGrid)
+                    then PlayableField movedTetromino (cleanedGrid |> projectTetrominoToGrid Moving movedTetromino)
+                    else PlayableField tetromino grid
+
 
 applyCommand : TetrominoCommand -> PlayField -> PlayField
 applyCommand command field =
     case field of
         FullField _ -> field
         PlayableField tetromino grid -> moveTetrominoOnGrid command tetromino grid
+
+fixTetromino : PlayField -> PlayField
+fixTetromino field = case field of
+    PlayableField tetromino grid -> PlayableField tetromino grid
+    _ as fullGrid -> fullGrid
 
