@@ -1,24 +1,31 @@
 module TetrominoTests exposing (..)
 
 import Expect
+import Fuzzing exposing (fuzzShape)
+import Shape exposing (cellPositions, fromStringRepresentation, rotateClockWise, rotateCounterClockWise, shapeL, shapeT)
 import Test exposing (..)
-import Tetromino exposing (..)
 
 suite : Test
 suite =
     describe "Tetromino tests"
-        [ test "rotating shape 90° clockwise" <|
-            \_ ->
-                let
-                    rotatedShape = [[True,False],[True,False],[True,True]]
-                in
-                    Expect.equal rotatedShape (rotateClockWise shapeL)
-           , test "rotating shape 90° clockwise then counterclockwise" <|
-                         \_ -> Expect.equal shapeL ((rotateClockWise >> rotateCounterClockWise) shapeL)
-           , test "rotating shape 90° clockwise four times" <|
-                         \_ ->
-                         let
-                             fourTimesRotation = (rotateClockWise >> rotateClockWise >> rotateClockWise >> rotateClockWise)
-                         in
-                             Expect.equal shapeL (fourTimesRotation shapeL)
+        [ test "Retrieve Cell positions" <|
+                \_ -> Expect.equal [(0,1),(1,0),(1,1),(1,2)] (cellPositions shapeT)
+          , test "rotating shape 90° clockwise" <|
+                \_ ->
+                    let
+                      rotatedShape = fromStringRepresentation [
+                            " X ",
+                            " X ",
+                            " XX"
+                        ]
+                    in
+                      Expect.equal rotatedShape (rotateClockWise shapeL)
+           , fuzz fuzzShape  "rotating shape 90° clockwise then counterclockwise" <|
+                \shape -> Expect.equal shape ((rotateClockWise >> rotateCounterClockWise) shape)
+           , fuzz fuzzShape "rotating shape 90° clockwise four times" <|
+                \shape ->
+                     let
+                         fourTimesRotation = (rotateClockWise >> rotateClockWise >> rotateClockWise >> rotateClockWise)
+                     in
+                         Expect.equal shape (fourTimesRotation shape)
         ]
