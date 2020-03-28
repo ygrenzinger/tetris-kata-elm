@@ -2,7 +2,7 @@ module Shape exposing (..)
 
 import Array exposing (Array)
 
-type ShapeName = I | J | L | O | S | Z | T
+-- type ShapeName = I | J | L | O | S | Z | T
 type ShapeCell = Empty | Full
 type alias Shape = List (List ShapeCell)
 

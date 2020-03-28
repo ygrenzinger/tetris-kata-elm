@@ -1,7 +1,7 @@
 module Playfield exposing (..)
 
 import Array exposing (Array, repeat)
-import Shape exposing (Shape, cellPositions, shapeSize)
+import Shape exposing (Shape, shapeSize)
 import Tetromino exposing (Tetromino(..), TetrominoCommand(..), moveTetrominoDown, moveTetrominoLeft, moveTetrominoRight, tetrominoPositions)
 
 type Cell = Empty | Moving | Fixed
@@ -84,7 +84,8 @@ applyCommand command field =
         PlayableField tetromino grid -> moveTetrominoOnGrid command tetromino grid
 
 fixTetromino : PlayField -> PlayField
-fixTetromino field = case field of
-    PlayableField tetromino grid -> PlayableField tetromino grid
-    _ as fullGrid -> fullGrid
+fixTetromino field =
+    case field of
+        FullField _ -> field
+        PlayableField tetromino grid -> PlayableField tetromino grid
 
