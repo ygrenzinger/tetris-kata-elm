@@ -76,7 +76,6 @@ moveTetrominoOnGrid command tetromino grid =
                     then PlayableField movedTetromino (cleanedGrid |> projectTetrominoToGrid Moving movedTetromino)
                     else PlayableField tetromino grid
 
-
 applyCommand : TetrominoCommand -> PlayField -> PlayField
 applyCommand command field =
     case field of
@@ -87,5 +86,5 @@ fixTetromino : PlayField -> PlayField
 fixTetromino field =
     case field of
         FullField _ -> field
-        PlayableField tetromino grid -> PlayableField tetromino grid
+        PlayableField tetromino grid -> PlayableField tetromino (projectTetrominoToGrid Fixed tetromino grid)
 

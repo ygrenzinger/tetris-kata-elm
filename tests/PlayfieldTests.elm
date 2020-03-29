@@ -50,7 +50,7 @@ suite = describe "Playfield mechanics"
                         field = List.foldl applyCommand (createPlayfield shapeO) commands
                      in
                         Expect.equal 4 (countMovingCell (0,19) (0,9) field)
-                , skip <| test "Fix tetromino" <|
+                , test "Fix tetromino" <|
                     \_ ->
                     let
                         field = List.foldl applyCommand (createPlayfield shapeO) (List.repeat 20 MoveDown) |> fixTetromino
