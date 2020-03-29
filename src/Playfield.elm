@@ -7,7 +7,8 @@ import Tetromino exposing (Tetromino(..), TetrominoCommand(..), moveTetrominoDow
 type Cell = Empty | Moving | Fixed
 type alias Row = Array Cell
 type alias Grid = Array Row
-type PlayField = PlayableField Tetromino Grid | FullField Grid
+type PlayField = PlayField Tetromino Grid
+type PlayFieldState = Playable | Full
 
 createRow : Row
 createRow = (repeat 10 Empty)
@@ -34,35 +35,32 @@ createGrid : Grid
 createGrid = Array.repeat 20 createRow
 
 createPlayfield : Shape -> PlayField
-createPlayfield shape = spawnTetromino shape createGrid
+createPlayfield shape = case (spawnTetromino shape createGrid) of
+    (_ as field, _) -> field
 
 retrieveGrid : PlayField -> Grid
-retrieveGrid field = case field of
-     (PlayableField _ grid) -> grid
-     (FullField grid) -> grid
+retrieveGrid (PlayField _ grid) = grid
 
 setGrid : PlayField -> Grid -> PlayField
-setGrid field grid = case field of
-     (PlayableField tetromino _) -> PlayableField tetromino grid
-     (FullField _) -> FullField grid
+setGrid (PlayField tetromino _) grid = PlayField tetromino grid
 
-retrieveTetromino : PlayField -> Maybe Tetromino
-retrieveTetromino field = case field of
-     (PlayableField tetromino _) -> Just tetromino
-     (FullField _) -> Nothing
+retrieveTetromino : PlayField -> Tetromino
+retrieveTetromino (PlayField tetromino _) = tetromino
 
 isPossiblePosition : Tetromino -> Grid -> Bool
-isPossiblePosition tetromino grid = (countCellAtState Empty (tetrominoPositions tetromino) grid) == 4
+isPossiblePosition tetromino grid =
+    (countCellAtState Empty (tetrominoPositions tetromino) grid) == 4
 
-spawnTetromino :  Shape -> Grid -> PlayField
+spawnTetromino :  Shape -> Grid -> (PlayField, PlayFieldState)
 spawnTetromino shape grid =
     let
         columnPos = if (shapeSize shape) == 3 then 4 else 3
         tetromino = Tetromino.Tetromino shape (0 , columnPos)
+        field = PlayField tetromino <| projectTetrominoToGrid Moving tetromino grid
      in
         if (isPossiblePosition tetromino grid)
-            then PlayableField tetromino (projectTetrominoToGrid Moving tetromino grid)
-            else FullField grid
+            then (field, Playable)
+            else (field, Full)
 
 projectTetrominoToGrid : Cell -> Tetromino -> Grid -> Grid
 projectTetrominoToGrid cell tetromino grid =
@@ -78,18 +76,14 @@ moveTetrominoOnGrid command tetromino grid =
         cleanedGrid = projectTetrominoToGrid Empty tetromino grid
     in
         if (isPossiblePosition movedTetromino cleanedGrid)
-                    then PlayableField movedTetromino (cleanedGrid |> projectTetrominoToGrid Moving movedTetromino)
-                    else PlayableField tetromino grid
+                    then PlayField movedTetromino (cleanedGrid |> projectTetrominoToGrid Moving movedTetromino)
+                    else PlayField tetromino grid
 
 applyCommand : TetrominoCommand -> PlayField -> PlayField
-applyCommand command field =
-    case field of
-        FullField _ -> field
-        PlayableField tetromino grid -> moveTetrominoOnGrid command tetromino grid
+applyCommand command (PlayField tetromino grid) =
+    moveTetrominoOnGrid command tetromino grid
 
 fixTetromino : PlayField -> PlayField
-fixTetromino field =
-    case field of
-        FullField _ -> field
-        PlayableField tetromino grid -> PlayableField tetromino (projectTetrominoToGrid Fixed tetromino grid)
+fixTetromino (PlayField tetromino grid) =
+    PlayField tetromino  <| projectTetrominoToGrid Fixed tetromino grid
 
