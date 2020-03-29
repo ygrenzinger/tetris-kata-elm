@@ -41,6 +41,11 @@ retrieveGrid field = case field of
      (PlayableField _ grid) -> grid
      (FullField grid) -> grid
 
+setGrid : PlayField -> Grid -> PlayField
+setGrid field grid = case field of
+     (PlayableField tetromino _) -> PlayableField tetromino grid
+     (FullField _) -> FullField grid
+
 retrieveTetromino : PlayField -> Maybe Tetromino
 retrieveTetromino field = case field of
      (PlayableField tetromino _) -> Just tetromino

@@ -3,7 +3,7 @@ module PlayfieldTests exposing (..)
 import Expect
 import Fuzz exposing (list)
 import Fuzzing exposing (fuzzCommand, fuzzShape)
-import Playfield exposing (Cell(..), PlayField(..), applyCommand, countCellAtState, createPlayfield, fixTetromino, retrieveGrid)
+import Playfield exposing (Cell(..), PlayField(..), applyCommand, countCellAtState, createPlayfield, fixTetromino, retrieveGrid, setCellState, setGrid)
 import Shape exposing (shapeO)
 import Test exposing (..)
 import Tetromino exposing (Tetromino(..), TetrominoCommand(..))
@@ -50,6 +50,14 @@ suite = describe "Playfield mechanics"
                         field = List.foldl applyCommand (createPlayfield shapeO) commands
                      in
                         Expect.equal 4 (countMovingCell (0,19) (0,9) field)
+                , test "Move tetromino until blocked by fixed cells" <|
+                    \_ ->
+                    let
+                        originalField = (createPlayfield shapeO)
+                        updatedGrid = List.foldl (setCellState Fixed) (retrieveGrid originalField) (buildPositions (18,19) (0,9))
+                        field = List.foldl applyCommand (setGrid originalField updatedGrid) (List.repeat 20 MoveDown)
+                    in
+                        Expect.equal 4 (countMovingCell (16,17) (0,9) field)
                 , test "Fix tetromino" <|
                     \_ ->
                     let
