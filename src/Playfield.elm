@@ -2,7 +2,7 @@ module Playfield exposing (..)
 
 import Array exposing (Array, repeat)
 import Shape exposing (Shape, shapeSize)
-import Tetromino exposing (Tetromino(..), TetrominoCommand(..), moveTetrominoDown, moveTetrominoLeft, moveTetrominoRight, tetrominoPositions)
+import Tetromino exposing (Tetromino(..), TetrominoCommand(..), moveTetrominoDown, moveTetrominoLeft, moveTetrominoRight, rotateTetrominoLeft, rotateTetrominoRight, tetrominoPositions)
 
 type Cell = Empty | Moving | Fixed
 type alias Row = Array Cell
@@ -73,6 +73,8 @@ moveTetrominoOnGrid command tetromino grid =
             MoveDown -> moveTetrominoDown tetromino
             MoveLeft -> moveTetrominoLeft tetromino
             MoveRight -> moveTetrominoRight tetromino
+            RotateLeft -> rotateTetrominoLeft tetromino
+            RotateRight -> rotateTetrominoRight tetromino
         cleanedGrid = projectTetrominoToGrid Empty tetromino grid
     in
         if (isPossiblePosition movedTetromino cleanedGrid)

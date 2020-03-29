@@ -2,9 +2,9 @@ module PlayfieldTests exposing (..)
 
 import Expect
 import Fuzz exposing (list)
-import Fuzzing exposing (fuzzCommand, fuzzShape)
+import Fuzzing exposing (fuzzMoveCommand, fuzzShape)
 import Playfield exposing (Cell(..), PlayField(..), applyCommand, countCellAtState, createPlayfield, fixTetromino, retrieveGrid, setCellState, setGrid)
-import Shape exposing (shapeO)
+import Shape exposing (shapeI, shapeO)
 import Test exposing (..)
 import Tetromino exposing (Tetromino(..), TetrominoCommand(..))
 
@@ -44,7 +44,7 @@ suite = describe "Playfield mechanics"
                         field = List.foldl applyCommand (createPlayfield shapeO) (List.repeat 20 MoveDown)
                      in
                         Expect.equal 4 (countMovingCell (18,19) (3,7) field)
-                , fuzz (list fuzzCommand) "Whatever the move, there always should be only 4 moving cells" <|
+                , fuzz (list fuzzMoveCommand) "Whatever the move, there always should be only 4 moving cells" <|
                     \commands ->
                     let
                         field = List.foldl applyCommand (createPlayfield shapeO) commands
@@ -58,6 +58,18 @@ suite = describe "Playfield mechanics"
                         field = List.foldl applyCommand (setGrid originalField updatedGrid) (List.repeat 20 MoveDown)
                     in
                         Expect.equal 4 (countMovingCell (16,17) (0,9) field)
+                , test "Rotating tetromino on the left" <|
+                    \_ ->
+                    let
+                        field = applyCommand RotateLeft <| createPlayfield shapeI
+                     in
+                        Expect.equal 4 (countMovingCell (0,3) (4,4) field)
+                , test "Rotating tetromino on the right" <|
+                    \_ ->
+                    let
+                        field = applyCommand RotateRight <| createPlayfield shapeI
+                     in
+                        Expect.equal 4 (countMovingCell (0,3) (5,5) field)
                 , test "Fix tetromino" <|
                     \_ ->
                     let

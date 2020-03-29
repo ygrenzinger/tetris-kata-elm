@@ -17,5 +17,5 @@ chooseCommand i = case i of
     1 -> MoveRight
     _ -> MoveDown
 
-fuzzCommand : Fuzzer TetrominoCommand
-fuzzCommand = intRange 0 2 |> map chooseCommand
+fuzzMoveCommand : Fuzzer TetrominoCommand
+fuzzMoveCommand = intRange 0 2 |> map chooseCommand
