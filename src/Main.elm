@@ -8,9 +8,10 @@ module Main exposing (..)
 
 
 import Browser
-import Html exposing (Html, button, div, span, text)
-import Html.Attributes exposing (height, style, width)
-import Html.Events exposing (onClick)
+import Css exposing (..)
+import Html.Styled exposing (Html, button, div, text, toUnstyled)
+import Html.Styled.Attributes exposing (css)
+import Html.Styled.Events exposing (onClick)
 
 
 
@@ -18,7 +19,7 @@ import Html.Events exposing (onClick)
 
 
 main =
-  Browser.sandbox { init = init, update = update, view = view }
+  Browser.sandbox { init = init, update = update, view = view >> toUnstyled }
 
 
 
@@ -67,7 +68,12 @@ update msg model =
 
 buildRow: Row -> Html Msg
 buildRow row =
-    div []
+    div [
+        css [
+              height (px 20)
+            , margin (px 0)
+        ]
+    ]
      (List.map buildCell row)
 
 colorOfCell : Cell -> String
@@ -79,17 +85,20 @@ colorOfCell cell =
 buildCell: Cell -> Html Msg
 buildCell cell =
         div [
-            style "display" "inline-block",
-            style "background-color" (colorOfCell cell),
-            style "margin" "1px",
-            style "width" "10px",
-            style "height" "10px"
-        ] []
+            css
+                [ display inlineBlock
+                , width (px 20)
+                , height (pct 100)
+                , boxSizing borderBox
+                , border3 (em 0.1) solid (rgb 0 0 0)
+                ]
+        ]
+        []
 
 buildGrid : Grid ->  Html Msg
 buildGrid grid =
   div []
-    (List.map buildRow grid)
+  (List.map buildRow grid)
 
 
 view : Model -> Html Msg
