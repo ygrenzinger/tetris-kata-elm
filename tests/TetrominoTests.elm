@@ -2,8 +2,9 @@ module TetrominoTests exposing (..)
 
 import Expect
 import Fuzzing exposing (fuzzShape)
-import Shape exposing (cellPositions, fromStringRepresentation, rotateClockWise, rotateCounterClockWise, shapeL, shapeT)
+import Shape exposing (cellPositions, fromStringRepresentation, rotateClockWise, rotateCounterClockWise, shapeI, shapeL, shapeT)
 import Test exposing (..)
+import Tetromino exposing (Tetromino(..), WallKick(..), moveTetrominoLeft, moveTetrominoRight, rotateTetrominoLeft, rotateTetrominoRight, whichWallKickToAttempt)
 
 suite : Test
 suite =
@@ -28,4 +29,19 @@ suite =
                          fourTimesRotation = (rotateClockWise >> rotateClockWise >> rotateClockWise >> rotateClockWise)
                      in
                          Expect.equal shape (fourTimesRotation shape)
+           , test "Right Wall Kick possible" <|
+                \_ ->
+                    let
+                        tetromino = rotateTetrominoLeft (Tetromino shapeI (0, 3))
+                        movedTetromino = List.foldl (\f t -> f t) tetromino (List.repeat 5 moveTetrominoRight)
+                     in
+                        Expect.equal (Just (RightWallKick 2)) (whichWallKickToAttempt movedTetromino)
+           , test "Left Wall Kick possible" <|
+                \_ ->
+                    let
+                        tetromino = rotateTetrominoRight (Tetromino shapeI (0, 3))
+                        movedTetromino = List.foldl (\f t -> f t) tetromino (List.repeat 5 moveTetrominoLeft)
+                     in
+                        Expect.equal (Just (LeftWallKick 2)) (whichWallKickToAttempt movedTetromino)
+
         ]
