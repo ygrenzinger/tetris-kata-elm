@@ -2,11 +2,15 @@ module Fuzzing exposing (..)
 
 import Array
 import Fuzz exposing (Fuzzer, int, intRange, map)
-import Shape exposing (Shape, shapeI, shapes)
+import Shape exposing (Shape, shapeI, allShapes)
 import Tetromino exposing (MoveCommand(..), TetrominoCommand(..))
 
 retrieveShape : Int -> Shape
-retrieveShape i = Array.get (modBy (Array.length shapes) i) shapes |> Maybe.withDefault shapeI
+retrieveShape i =
+    let
+        shapesArray = (Array.fromList allShapes)
+    in
+        Array.get (modBy (Array.length shapesArray) i) shapesArray |> Maybe.withDefault shapeI
 
 fuzzShape : Fuzzer Shape
 fuzzShape = int |> map retrieveShape

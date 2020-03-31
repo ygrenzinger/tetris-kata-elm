@@ -1,6 +1,6 @@
 module Shape exposing (..)
 
-import Array exposing (Array)
+import Random
 
 -- type ShapeName = I | J | L | O | S | Z | T
 type ShapeCell = Empty | Full
@@ -96,5 +96,12 @@ shapeT = fromStringRepresentation [
                  "   "
              ]
 
-shapes : Array Shape
-shapes = Array.fromList [shapeI, shapeJ, shapeL, shapeO, shapeS, shapeZ, shapeT]
+allShapes : List Shape
+allShapes = [shapeI, shapeJ, shapeL, shapeO, shapeS, shapeZ, shapeT]
+
+randomShapeGenerator : List Shape -> Random.Generator (Maybe Shape)
+randomShapeGenerator possibleShapes = case possibleShapes of
+    [] -> Random.constant Nothing
+    head::[] -> Random.constant (Just head)
+    head::rest -> Random.uniform head rest |> Random.map Just
+
