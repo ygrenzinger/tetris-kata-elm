@@ -24,8 +24,8 @@ rotateTetrominoRight (Tetromino shape (i,j)) = (Tetromino (rotateClockWise shape
 rotateTetrominoLeft : Tetromino -> Tetromino
 rotateTetrominoLeft (Tetromino shape (i,j)) = (Tetromino (rotateCounterClockWise shape) (i,j))
 
-tetrominoPositions : Tetromino -> List (Int, Int)
-tetrominoPositions (Tetromino shape (i,j)) = List.map (\(ii,jj) -> (ii + i, jj + j))  (cellPositions shape)
+positions : Tetromino -> List (Int, Int)
+positions (Tetromino shape (i,j)) = List.map (\(ii,jj) -> (ii + i, jj + j))  (cellPositions shape)
 
 whichWallKickToAttempt : Tetromino -> Maybe WallKick
 whichWallKickToAttempt (Tetromino shape (_,j)) =
@@ -34,3 +34,6 @@ whichWallKickToAttempt (Tetromino shape (_,j)) =
         else if ((j + (shapeSize shape)) >= 9)
             then Just (RightWallKick (j + (shapeSize shape) - 10))
             else Nothing
+
+samePosition : Tetromino -> Tetromino -> Bool
+samePosition (Tetromino _ (a,b)) (Tetromino _ (c,d)) = a == c && b == d

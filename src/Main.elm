@@ -14,11 +14,12 @@ import Html.Styled exposing (Html, button, div, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
-import Playfield exposing (Cell(..), Grid, Row, applyCommand, retrieveGrid)
+import Playfield exposing (Cell(..), Grid, PlayField, PlayFieldState(..), Row, retrieveGrid)
 import Random
 import Shape exposing (Shape, allShapes, randomShapeGenerator)
-import Tetris exposing (Tetris, applyOnField, retrieveField, startTetris)
+import Tetris as T exposing (SpawnCommand(..), Tetris(..))
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
+import Time
 
 
 
@@ -37,50 +38,82 @@ main =
 
 -- MODEL
 
-type alias Model = { game : Maybe Tetris }
+type Game = NotStarted | Started Tetris | GameOver Tetris
+
+type alias Model = Game
 
 init : () -> (Model, Cmd Msg)
-init _ = ( { game = Nothing}, Cmd.none)
+init _ = ( NotStarted, Cmd.none)
 
 -- UPDATE
 
 
 type Msg = KeyDown RawKey
+    | Tick Time.Posix
+    | SpawnTetromino (Maybe Shape)
     | StartGame
     | NewGame (Maybe Shape)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case msg of
-        StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
-        NewGame Nothing -> (model, Cmd.none)
-        NewGame (Just shape) -> ({game = Just <| startTetris shape}, Cmd.none)
-        KeyDown rawKey -> (applyKeyPress model rawKey, Cmd.none)
+    case model of
+        NotStarted -> case msg of
+            StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
+            NewGame (Just shape) -> (Started <| T.startTetris shape, Cmd.none)
+            NewGame Nothing -> (model, Cmd.none)
+            _ -> (model, Cmd.none)
+        GameOver _ -> case msg of
+            StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
+            _ -> (model, Cmd.none)
+        Started tetris ->
+            case msg of
+                StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
+                NewGame (Just shape) -> (Started <| T.startTetris shape, Cmd.none)
+                NewGame Nothing -> (model, Cmd.none)
+                KeyDown rawKey -> (Started <| applyKeyPress tetris rawKey, Cmd.none)
+                Tick _ -> Tuple.mapFirst Started <| applyGameLoop tetris
+                SpawnTetromino shape -> spawnTetromino shape tetris
 
-applyKeyPress : Model -> RawKey -> Model
-applyKeyPress {game} rawkey = case (keyToTetrominoCommand rawkey, game) of
-    (Just command, Just tetris) -> {game = Just (applyOnField (applyCommand command) tetris) }
-    _ -> {game = game}
+spawnTetromino : Maybe Shape -> Tetris -> (Model, Cmd Msg)
+spawnTetromino potentialShape tetris = case potentialShape of
+    Nothing -> ( Started <| T.resetAvailableShapes tetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes))
+    Just shape -> case (T.spawnTetromino shape tetris) of
+        (updatedTetris, Full) -> (GameOver updatedTetris, Cmd.none)
+        (updatedTetris, Playable) -> (Started updatedTetris, Cmd.none)
 
-keyToTetrominoCommand : RawKey -> Maybe TetrominoCommand
-keyToTetrominoCommand rawKey = case (Keyboard.anyKeyOriginal rawKey) of
-    Just (Character char) -> case char of
-        "w" -> Just (Move MoveLeft)
-        "c" -> Just (Move MoveRight)
-        "x" -> Just (Move MoveDown)
-        "s" -> Just (Rotate RotateLeft)
-        "d" -> Just (Rotate RotateRight)
-        _ -> Nothing
+applyGameLoop : Tetris -> (Tetris, Cmd Msg)
+applyGameLoop tetris =
+    case (T.makePieceFallDown tetris) of
+            (updatedTetris, SpawnRandomShape availableShapes) -> 
+                (updatedTetris, Random.generate SpawnTetromino (randomShapeGenerator availableShapes))
+            (updatedTetris, _) -> (updatedTetris, Cmd.none)
+
+applyKeyPress : Tetris -> RawKey -> Tetris
+applyKeyPress tetris rawkey = case (keyToTetrisCommand rawkey) of
+    Just command -> T.applyTetrominoCommand command tetris
+    _ -> tetris
+
+keyToTetrisCommand : RawKey -> Maybe TetrominoCommand
+keyToTetrisCommand rawKey = case (Keyboard.anyKeyOriginal rawKey) of
+    Just ArrowDown -> Just (Move MoveDown)
+    Just ArrowLeft -> Just (Move MoveLeft)
+    Just ArrowRight -> Just (Move MoveRight)
+    Just ArrowUp -> Just (Rotate RotateRight)
+    Just Alt -> Just (Rotate RotateLeft)
+    Just Control -> Just (Rotate RotateRight)
     Just Spacebar -> Nothing
     _ -> Nothing
 
 -- SUBSCRIPTIONS
 
 subscriptions: Model -> Sub Msg
-subscriptions model =
-    Sub.batch
-        [ Keyboard.downs KeyDown ]
+subscriptions _ =
+    Sub.batch [
+          Keyboard.downs KeyDown
+        , Time.every 1000 Tick
+    ]
+
 
 -- VIEW
 
@@ -121,10 +154,14 @@ buildGrid grid =
 
 
 view : Model -> Html Msg
-view {game} =
-    case game of
-        Nothing ->  div [] [ button [ onClick StartGame ] [ text "start game" ] ]
-        Just tetris -> div [] [
-                retrieveField tetris |> retrieveGrid |> buildGrid
+view model =
+    case model of
+        NotStarted ->  div [] [ button [ onClick StartGame ] [ text "start game" ] ]
+        GameOver tetris ->  div [] [
+               T.retrieveField tetris |> retrieveGrid |> buildGrid
+               , button [ onClick StartGame ] [ text "restart game" ]
+            ]
+        Started tetris  -> div [] [
+                T.retrieveField tetris |> retrieveGrid |> buildGrid
                 , button [ onClick StartGame ] [ text "restart game" ]
             ]

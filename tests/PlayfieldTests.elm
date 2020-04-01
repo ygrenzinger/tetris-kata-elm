@@ -1,10 +1,9 @@
 module PlayfieldTests exposing (..)
 
-import Array
 import Expect
 import Fuzz exposing (list)
 import Fuzzing exposing (fuzzMoveCommand, fuzzShape)
-import Playfield exposing (Cell(..), Grid, PlayField(..), applyCommand, countCellAtState, createPlayfield, fixTetromino, cleanFullLines, retrieveGrid, retrieveTetromino, setCellState, setGrid)
+import Playfield exposing (..)
 import Shape exposing (shapeI, shapeO)
 import Test exposing (..)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), Tetromino(..), TetrominoCommand(..))
@@ -111,5 +110,6 @@ suite = describe "Playfield mechanics"
                         nbBottomLinesFixedBlocks = retrieveGrid field |> countCellAtState Fixed (buildPositions (19,19) (0,9))
                     in
                         Expect.equal (13,9,3) (nbTotalFixedBlocks, nbBottomLinesFixedBlocks, nblines)
+                 , test ""
 
             ]
