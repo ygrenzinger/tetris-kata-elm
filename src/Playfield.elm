@@ -19,8 +19,8 @@ updateRow = Array.set
 isRowFullOf : Cell -> Row -> Bool
 isRowFullOf cell = List.all (\c -> c == cell) << Array.toList
 
-countCellAtState : Cell -> List (Int, Int) -> Grid -> Int
-countCellAtState state positions grid =
+countCellAtState : Cell -> List (Int, Int) -> PlayField -> Int
+countCellAtState state positions (PlayField _ grid) =
     List.map (\pos -> if ((getCellState grid pos) == (Just state)) then 1 else 0) positions
         |> List.sum
 
@@ -43,25 +43,18 @@ createPlayfield = PlayField Nothing createGrid
 retrieveGrid : PlayField -> Grid
 retrieveGrid (PlayField _ grid) = grid
 
-setGrid : PlayField -> Grid -> PlayField
-setGrid (PlayField tetromino _) grid = PlayField tetromino grid
-
-retrieveTetromino : PlayField -> Maybe Tetromino
-retrieveTetromino (PlayField tetromino _) = tetromino
-
-isPossiblePosition : Tetromino -> Grid -> Bool
+isPossiblePosition : Tetromino -> PlayField -> Bool
 isPossiblePosition tetromino grid =
     (countCellAtState Empty (T.positions tetromino) grid) == 4
 
 spawnTetromino :  Shape -> PlayField -> (PlayField, PlayFieldState)
-spawnTetromino shape (PlayField _ grid) =
+spawnTetromino shape field =
     let
         columnPos = if (shapeSize shape) == 3 then 4 else 3
         tetromino = Tetromino shape (0 , columnPos)
-        field = projectTetrominoToGrid Moving tetromino grid
      in
-        if (isPossiblePosition tetromino grid)
-            then (field, Playable)
+        if (isPossiblePosition tetromino field)
+            then (projectTetrominoToGrid Moving tetromino (retrieveGrid field), Playable)
             else (field, Full)
 
 projectTetrominoToGrid : Cell -> Tetromino -> Grid -> PlayField
@@ -78,7 +71,7 @@ applyCommandOnTetromino command tetromino grid =
     let
         updatedTetromino = T.applyCommand command tetromino
         cleanedField = projectTetrominoToGrid Empty tetromino grid
-        isPossible = isPossiblePosition updatedTetromino <| retrieveGrid cleanedField
+        isPossible = isPossiblePosition updatedTetromino cleanedField
     in
         case (command, isPossible) of
             ((T.Rotate _ ), True) -> projectTetrominoToGrid Moving updatedTetromino <| retrieveGrid cleanedField
@@ -100,7 +93,7 @@ tryWallKick wallKick command tetromino grid =
             T.RotateLeft -> T.rotateTetrominoLeft
             T.RotateRight -> T.rotateTetrominoRight
         cleanedField = projectTetrominoToGrid Empty tetromino grid
-        isPossible = isPossiblePosition updatedTetromino <| retrieveGrid cleanedField
+        isPossible = isPossiblePosition updatedTetromino cleanedField
     in if isPossible
         then projectTetrominoToGrid Moving updatedTetromino <| retrieveGrid cleanedField
         else PlayField (Just tetromino) grid
