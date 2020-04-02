@@ -1,6 +1,7 @@
 module Shape exposing (..)
 
 import Random
+import Random.List
 
 -- type ShapeName = I | J | L | O | S | Z | T
 type ShapeCell = Empty | Full
@@ -99,9 +100,6 @@ shapeT = fromStringRepresentation [
 allShapes : List Shape
 allShapes = [shapeI, shapeJ, shapeL, shapeO, shapeS, shapeZ, shapeT]
 
-randomShapeGenerator : List Shape -> Random.Generator (Maybe Shape)
-randomShapeGenerator possibleShapes = case possibleShapes of
-    [] -> Random.constant Nothing
-    head::[] -> Random.constant (Just head)
-    head::rest -> Random.uniform head rest |> Random.map Just
+randomShapeGenerator : List Shape -> Random.Generator (Maybe Shape, List Shape)
+randomShapeGenerator possibleShapes = Random.List.choose possibleShapes
 

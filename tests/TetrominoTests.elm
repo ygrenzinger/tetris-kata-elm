@@ -4,7 +4,7 @@ import Expect
 import Fuzzing exposing (fuzzShape)
 import Shape exposing (cellPositions, fromStringRepresentation, rotateClockWise, rotateCounterClockWise, shapeI, shapeL, shapeT)
 import Test exposing (..)
-import Tetromino exposing (Tetromino(..), WallKick(..), moveTetrominoLeft, moveTetrominoRight, rotateTetrominoLeft, rotateTetrominoRight, whichWallKickToAttempt)
+import Tetromino exposing (Tetromino(..), WallKick(..), moveTetrominoLeft, moveTetrominoRight, rotateTetrominoLeft, rotateTetrominoRight, samePosition, whichWallKickToAttempt)
 
 suite : Test
 suite =
@@ -43,5 +43,8 @@ suite =
                         movedTetromino = List.foldl (\f t -> f t) tetromino (List.repeat 5 moveTetrominoLeft)
                      in
                         Expect.equal (Just (LeftWallKick 2)) (whichWallKickToAttempt movedTetromino)
+            , test "Same position" <|
+                \_ ->
+                    Expect.true "Same position" (samePosition (Tetromino shapeI (18, 6)) (Tetromino shapeI (18, 6)))
 
         ]

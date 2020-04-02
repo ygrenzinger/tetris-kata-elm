@@ -9,6 +9,14 @@ type RotateCommand = RotateLeft | RotateRight
 
 type WallKick = LeftWallKick Int | RightWallKick Int
 
+applyCommand : TetrominoCommand -> Tetromino -> Tetromino
+applyCommand command = case command of
+            (Move MoveDown) -> moveTetrominoDown
+            (Move MoveLeft) -> moveTetrominoLeft
+            (Move MoveRight) -> moveTetrominoRight
+            (Rotate RotateLeft) -> rotateTetrominoLeft
+            (Rotate RotateRight) -> rotateTetrominoRight
+
 moveTetrominoDown : Tetromino -> Tetromino
 moveTetrominoDown (Tetromino shape (i,j)) = (Tetromino shape (i + 1,j))
 

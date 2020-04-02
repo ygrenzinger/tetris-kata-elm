@@ -50,35 +50,27 @@ init _ = ( NotStarted, Cmd.none)
 
 type Msg = KeyDown RawKey
     | Tick Time.Posix
-    | SpawnTetromino (Maybe Shape)
+    | SpawnTetromino (Maybe Shape, List Shape)
     | StartGame
-    | NewGame (Maybe Shape)
 
 
 update : Msg -> Model -> (Model, Cmd Msg)
 update msg model =
-    case model of
-        NotStarted -> case msg of
-            StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
-            NewGame (Just shape) -> (Started <| T.startTetris shape, Cmd.none)
-            NewGame Nothing -> (model, Cmd.none)
-            _ -> (model, Cmd.none)
-        GameOver _ -> case msg of
-            StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
-            _ -> (model, Cmd.none)
-        Started tetris ->
-            case msg of
-                StartGame -> (model, Random.generate NewGame (randomShapeGenerator allShapes))
-                NewGame (Just shape) -> (Started <| T.startTetris shape, Cmd.none)
-                NewGame Nothing -> (model, Cmd.none)
-                KeyDown rawKey -> (Started <| applyKeyPress tetris rawKey, Cmd.none)
-                Tick _ -> Tuple.mapFirst Started <| applyGameLoop tetris
-                SpawnTetromino shape -> spawnTetromino shape tetris
+    case msg of
+        StartGame -> (Started <| T.startTetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes))
+        _ -> case model of
+                NotStarted -> (model, Cmd.none)
+                GameOver _ -> (model, Cmd.none)
+                Started tetris ->
+                    case msg of
+                        StartGame -> (Started <| T.startTetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes))
+                        KeyDown rawKey -> (Started <| applyKeyPress tetris rawKey, Cmd.none)
+                        Tick _ -> Tuple.mapFirst Started <| applyGameLoop tetris
+                        SpawnTetromino (Nothing, _) -> (model, Random.generate SpawnTetromino (randomShapeGenerator allShapes))
+                        SpawnTetromino (Just shape, availableShapes) -> spawnTetromino shape availableShapes tetris
 
-spawnTetromino : Maybe Shape -> Tetris -> (Model, Cmd Msg)
-spawnTetromino potentialShape tetris = case potentialShape of
-    Nothing -> ( Started <| T.resetAvailableShapes tetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes))
-    Just shape -> case (T.spawnTetromino shape tetris) of
+spawnTetromino : Shape -> List Shape -> Tetris -> (Model, Cmd Msg)
+spawnTetromino shape  availableShapes tetris = case (T.spawnTetromino shape availableShapes tetris) of
         (updatedTetris, Full) -> (GameOver updatedTetris, Cmd.none)
         (updatedTetris, Playable) -> (Started updatedTetris, Cmd.none)
 
