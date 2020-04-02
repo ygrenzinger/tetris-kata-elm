@@ -7,7 +7,7 @@ module Main exposing (..)
 --
 
 import Array
-import Browser
+import Browser exposing (Document)
 import Css exposing (..)
 import Html.Styled exposing (Html, button, div, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
@@ -26,11 +26,11 @@ import Time
 
 
 main =
-    Browser.element
+    Browser.document
         { init = init
         , update = update
         , subscriptions = subscriptions
-        , view = view >> toUnstyled
+        , view = view
         }
 
 
@@ -46,7 +46,6 @@ type Game
 
 type alias Model =
     Game
-
 
 init : () -> ( Model, Cmd Msg )
 init _ =
@@ -214,9 +213,8 @@ buildGrid grid =
     div []
         (List.map buildRow (Array.toList grid))
 
-
-view : Model -> Html Msg
-view model =
+buildGame : Model -> Html Msg
+buildGame model =
     case model of
         NotStarted ->
             div [] [ button [ onClick StartGame ] [ text "start game" ] ]
@@ -232,3 +230,9 @@ view model =
                 [ T.retrieveField tetris |> retrieveGrid |> buildGrid
                 , button [ onClick StartGame ] [ text "restart game" ]
                 ]
+
+view : Model -> Document Msg
+view model =
+    { title = "Tetris Kata in Elm"
+    , body = List.singleton (buildGame model |> toUnstyled)
+  }
