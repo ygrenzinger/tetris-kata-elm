@@ -29,14 +29,9 @@ createPlayFieldWithShape shape =
     createPlayfield |> spawnTetromino shape |> Tuple.first
 
 
-makeTetrominoFallDownUntilBlocked : ( PlayField, Maybe Int ) -> ( PlayField, Maybe Int )
-makeTetrominoFallDownUntilBlocked ( PlayField tetromino grid, lines ) =
-    case tetromino of
-        Nothing ->
-            ( PlayField tetromino grid, lines )
-
-        _ ->
-            makeTetrominoFallDownUntilBlocked (makeTetrominoFallDown (PlayField tetromino grid))
+makeTetrominoFallDownUntilBlocked : PlayField -> ( PlayField, Maybe Int )
+makeTetrominoFallDownUntilBlocked playfield =
+    applyCommand Drop playfield |> makeTetrominoFallDown
 
 
 suite : Test
@@ -138,7 +133,7 @@ suite =
                         createPlayFieldWithShape shapeI
 
                     result =
-                        makeTetrominoFallDownUntilBlocked ( originalField, Nothing )
+                        makeTetrominoFallDownUntilBlocked originalField
 
                     nbTotalFixedBlocks =
                         Tuple.first result |> countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 ))
@@ -156,7 +151,7 @@ suite =
                         PlayField Nothing grid |> spawnTetromino shapeO
 
                     ( field, removedLines ) =
-                        makeTetrominoFallDownUntilBlocked ( originalField, Nothing )
+                        makeTetrominoFallDownUntilBlocked originalField
 
                     nbTotalFixedBlocks =
                         countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 )) field

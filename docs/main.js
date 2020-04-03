@@ -5236,9 +5236,7 @@ var $author$project$Main$init = function (_v0) {
 var $author$project$Main$KeyDown = function (a) {
 	return {$: 'KeyDown', a: a};
 };
-var $author$project$Main$Tick = function (a) {
-	return {$: 'Tick', a: a};
-};
+var $author$project$Main$Tick = {$: 'Tick'};
 var $elm$core$Platform$Sub$batch = _Platform_batch;
 var $ohanhi$keyboard$Keyboard$RawKey = function (a) {
 	return {$: 'RawKey', a: a};
@@ -5870,20 +5868,42 @@ var $elm$time$Time$every = F2(
 		return $elm$time$Time$subscription(
 			A2($elm$time$Time$Every, interval, tagger));
 	});
-var $author$project$Main$subscriptions = function (_v0) {
-	return $elm$core$Platform$Sub$batch(
-		_List_fromArray(
-			[
-				$ohanhi$keyboard$Keyboard$downs($author$project$Main$KeyDown),
-				A2($elm$time$Time$every, 1000, $author$project$Main$Tick)
-			]));
+var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
+var $elm$core$Basics$pow = _Basics_pow;
+var $author$project$Tetris$timeSpentInRow = function (_v0) {
+	var _v1 = _v0.c;
+	var level = _v1.b;
+	return A2($elm$core$Basics$pow, 0.8 - ((level - 1) * 0.007), level - 1) * 1000;
+};
+var $author$project$Main$subscriptions = function (model) {
+	if (model.$ === 'Playing') {
+		var tetris = model.a;
+		return $elm$core$Platform$Sub$batch(
+			_List_fromArray(
+				[
+					$ohanhi$keyboard$Keyboard$downs($author$project$Main$KeyDown),
+					A2(
+					$elm$time$Time$every,
+					$author$project$Tetris$timeSpentInRow(tetris),
+					function (_v1) {
+						return $author$project$Main$Tick;
+					})
+				]));
+	} else {
+		return $elm$core$Platform$Sub$none;
+	}
+};
+var $author$project$Main$Playing = function (a) {
+	return {$: 'Playing', a: a};
 };
 var $author$project$Main$SpawnTetromino = function (a) {
 	return {$: 'SpawnTetromino', a: a};
 };
-var $author$project$Main$Started = function (a) {
-	return {$: 'Started', a: a};
-};
+var $author$project$Shape$I = {$: 'I'};
+var $author$project$Shape$TetrominoShape = F3(
+	function (a, b, c) {
+		return {$: 'TetrominoShape', a: a, b: b, c: c};
+	});
 var $elm$core$Basics$composeR = F3(
 	function (f, g, x) {
 		return g(
@@ -5909,27 +5929,61 @@ var $author$project$Shape$fromStringRepresentation = function (lines) {
 			$elm$core$List$map($author$project$Shape$fromChar)),
 		lines);
 };
-var $author$project$Shape$shapeI = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		['    ', 'XXXX', '    ', '    ']));
-var $author$project$Shape$shapeJ = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		['X  ', 'XXX', '   ']));
-var $author$project$Shape$shapeL = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		['  X', 'XXX', '   ']));
-var $author$project$Shape$shapeO = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		[' XX ', ' XX ', '    ', '    ']));
-var $author$project$Shape$shapeS = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		[' XX', 'XX ', '   ']));
-var $author$project$Shape$shapeT = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		[' X ', 'XXX', '   ']));
-var $author$project$Shape$shapeZ = $author$project$Shape$fromStringRepresentation(
-	_List_fromArray(
-		['XX ', ' XX', '   ']));
+var $author$project$Shape$shapeI = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$I,
+	'00FFFF',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			['    ', 'XXXX', '    ', '    '])));
+var $author$project$Shape$J = {$: 'J'};
+var $author$project$Shape$shapeJ = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$J,
+	'00008B',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			['X  ', 'XXX', '   '])));
+var $author$project$Shape$L = {$: 'L'};
+var $author$project$Shape$shapeL = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$L,
+	'FF8C00',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			['  X', 'XXX', '   '])));
+var $author$project$Shape$O = {$: 'O'};
+var $author$project$Shape$shapeO = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$O,
+	'FFD700',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			[' XX ', ' XX ', '    ', '    '])));
+var $author$project$Shape$S = {$: 'S'};
+var $author$project$Shape$shapeS = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$S,
+	'008000',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			[' XX', 'XX ', '   '])));
+var $author$project$Shape$T = {$: 'T'};
+var $author$project$Shape$shapeT = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$T,
+	'800080',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			[' X ', 'XXX', '   '])));
+var $author$project$Shape$Z = {$: 'Z'};
+var $author$project$Shape$shapeZ = A3(
+	$author$project$Shape$TetrominoShape,
+	$author$project$Shape$Z,
+	'FF0000',
+	$author$project$Shape$fromStringRepresentation(
+		_List_fromArray(
+			['XX ', ' XX', '   '])));
 var $author$project$Shape$allShapes = _List_fromArray(
 	[$author$project$Shape$shapeI, $author$project$Shape$shapeJ, $author$project$Shape$shapeL, $author$project$Shape$shapeO, $author$project$Shape$shapeS, $author$project$Shape$shapeZ, $author$project$Shape$shapeT]);
 var $elm$random$Random$Generate = function (a) {
@@ -6031,16 +6085,63 @@ var $author$project$Tetris$Tetris = F3(
 	function (a, b, c) {
 		return {$: 'Tetris', a: a, b: b, c: c};
 	});
+var $author$project$Tetris$Scoring = F3(
+	function (a, b, c) {
+		return {$: 'Scoring', a: a, b: b, c: c};
+	});
+var $author$project$Tetris$addRemovedLinesToScoring = F2(
+	function (numberOfRemovedLines, _v0) {
+		var score = _v0.a;
+		var level = _v0.b;
+		var counter = _v0.c;
+		var updatedCounter = counter + function () {
+			switch (numberOfRemovedLines) {
+				case 1:
+					return 1;
+				case 2:
+					return 3;
+				case 3:
+					return 5;
+				case 4:
+					return 8;
+				default:
+					return 0;
+			}
+		}();
+		var updatedLevel = $elm$core$Basics$floor(updatedCounter / (5 * level)) + 1;
+		var scoreByLines = function () {
+			switch (numberOfRemovedLines) {
+				case 1:
+					return 40;
+				case 2:
+					return 100;
+				case 3:
+					return 300;
+				case 4:
+					return 1200;
+				default:
+					return 0;
+			}
+		}();
+		var updatedScore = score + (scoreByLines * level);
+		return A3($author$project$Tetris$Scoring, updatedScore, updatedLevel, updatedCounter);
+	});
 var $author$project$Playfield$PlayField = F2(
 	function (a, b) {
 		return {$: 'PlayField', a: a, b: b};
 	});
+var $author$project$Playfield$Fixed = function (a) {
+	return {$: 'Fixed', a: a};
+};
 var $author$project$Tetromino$Move = function (a) {
 	return {$: 'Move', a: a};
 };
 var $author$project$Tetromino$MoveDown = {$: 'MoveDown'};
+var $author$project$Tetromino$Drop = {$: 'Drop'};
 var $author$project$Playfield$Empty = {$: 'Empty'};
-var $author$project$Playfield$Moving = {$: 'Moving'};
+var $author$project$Playfield$Moving = function (a) {
+	return {$: 'Moving', a: a};
+};
 var $author$project$Tetromino$Tetromino = F2(
 	function (a, b) {
 		return {$: 'Tetromino', a: a, b: b};
@@ -6240,7 +6341,7 @@ var $elm$core$List$take = F2(
 	function (n, list) {
 		return A3($elm$core$List$takeFast, 0, n, list);
 	});
-var $author$project$Shape$innerRotateCounterClockWise = function (shape) {
+var $author$project$Shape$innerShapeRotateCounterClockWise = function (shape) {
 	var tails = A2(
 		$elm$core$List$map,
 		$elm$core$List$drop(1),
@@ -6253,11 +6354,21 @@ var $author$project$Shape$innerRotateCounterClockWise = function (shape) {
 	return $elm$core$List$isEmpty(heads) ? _List_Nil : A2(
 		$elm$core$List$cons,
 		heads,
-		$author$project$Shape$innerRotateCounterClockWise(tails));
+		$author$project$Shape$innerShapeRotateCounterClockWise(tails));
 };
-var $author$project$Shape$rotateCounterClockWise = function (shape) {
+var $author$project$Shape$rotateShapeCounterClockWise = function (shape) {
 	return $elm$core$List$reverse(
-		$author$project$Shape$innerRotateCounterClockWise(shape));
+		$author$project$Shape$innerShapeRotateCounterClockWise(shape));
+};
+var $author$project$Shape$rotateCounterClockWise = function (_v0) {
+	var name = _v0.a;
+	var color = _v0.b;
+	var shape = _v0.c;
+	return A3(
+		$author$project$Shape$TetrominoShape,
+		name,
+		color,
+		$author$project$Shape$rotateShapeCounterClockWise(shape));
 };
 var $author$project$Tetromino$rotateTetrominoLeft = function (_v0) {
 	var shape = _v0.a;
@@ -6269,7 +6380,7 @@ var $author$project$Tetromino$rotateTetrominoLeft = function (_v0) {
 		$author$project$Shape$rotateCounterClockWise(shape),
 		_Utils_Tuple2(i, j));
 };
-var $author$project$Shape$rotateClockWise = function (shape) {
+var $author$project$Shape$rotateShapeClockWise = function (shape) {
 	var tails = A2(
 		$elm$core$List$map,
 		$elm$core$List$drop(1),
@@ -6283,7 +6394,17 @@ var $author$project$Shape$rotateClockWise = function (shape) {
 	return $elm$core$List$isEmpty(heads) ? _List_Nil : A2(
 		$elm$core$List$cons,
 		heads,
-		$author$project$Shape$rotateClockWise(tails));
+		$author$project$Shape$rotateShapeClockWise(tails));
+};
+var $author$project$Shape$rotateClockWise = function (_v0) {
+	var name = _v0.a;
+	var color = _v0.b;
+	var shape = _v0.c;
+	return A3(
+		$author$project$Shape$TetrominoShape,
+		name,
+		color,
+		$author$project$Shape$rotateShapeClockWise(shape));
 };
 var $author$project$Tetromino$rotateTetrominoRight = function (_v0) {
 	var shape = _v0.a;
@@ -6296,27 +6417,38 @@ var $author$project$Tetromino$rotateTetrominoRight = function (_v0) {
 		_Utils_Tuple2(i, j));
 };
 var $author$project$Tetromino$applyCommand = function (command) {
-	if (command.$ === 'Move') {
-		switch (command.a.$) {
-			case 'MoveDown':
-				var _v1 = command.a;
-				return $author$project$Tetromino$moveTetrominoDown;
-			case 'MoveLeft':
-				var _v2 = command.a;
-				return $author$project$Tetromino$moveTetrominoLeft;
-			default:
-				var _v3 = command.a;
-				return $author$project$Tetromino$moveTetrominoRight;
-		}
-	} else {
-		if (command.a.$ === 'RotateLeft') {
-			var _v4 = command.a;
-			return $author$project$Tetromino$rotateTetrominoLeft;
-		} else {
-			var _v5 = command.a;
-			return $author$project$Tetromino$rotateTetrominoRight;
-		}
+	switch (command.$) {
+		case 'Move':
+			switch (command.a.$) {
+				case 'MoveDown':
+					var _v1 = command.a;
+					return $author$project$Tetromino$moveTetrominoDown;
+				case 'MoveLeft':
+					var _v2 = command.a;
+					return $author$project$Tetromino$moveTetrominoLeft;
+				default:
+					var _v3 = command.a;
+					return $author$project$Tetromino$moveTetrominoRight;
+			}
+		case 'Rotate':
+			if (command.a.$ === 'RotateLeft') {
+				var _v4 = command.a;
+				return $author$project$Tetromino$rotateTetrominoLeft;
+			} else {
+				var _v5 = command.a;
+				return $author$project$Tetromino$rotateTetrominoRight;
+			}
+		default:
+			return $author$project$Tetromino$moveTetrominoDown;
 	}
+};
+var $author$project$Shape$getColor = function (_v0) {
+	var color = _v0.b;
+	return color;
+};
+var $author$project$Tetromino$getColor = function (_v0) {
+	var shape = _v0.a;
+	return $author$project$Shape$getColor(shape);
 };
 var $elm$core$Maybe$andThen = F2(
 	function (callback, maybeValue) {
@@ -6377,22 +6509,52 @@ var $author$project$Playfield$getCellState = F2(
 			$elm$core$Array$get(j),
 			A2($elm$core$Array$get, i, grid));
 	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
 var $elm$core$List$sum = function (numbers) {
 	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
 };
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
+	});
 var $author$project$Playfield$countCellAtState = F3(
-	function (state, positions, _v0) {
+	function (fn, positions, _v0) {
 		var grid = _v0.b;
 		return $elm$core$List$sum(
 			A2(
 				$elm$core$List$map,
 				function (pos) {
-					return _Utils_eq(
-						A2($author$project$Playfield$getCellState, grid, pos),
-						$elm$core$Maybe$Just(state)) ? 1 : 0;
+					return A2(
+						$elm$core$Maybe$withDefault,
+						false,
+						A2(
+							$elm$core$Maybe$map,
+							fn,
+							A2($author$project$Playfield$getCellState, grid, pos))) ? 1 : 0;
 				},
 				positions));
 	});
+var $author$project$Playfield$isEmptyCell = function (cell) {
+	if (cell.$ === 'Empty') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var $elm$core$List$filter = F2(
 	function (isGood, list) {
 		return A3(
@@ -6407,9 +6569,10 @@ var $elm$core$List$filter = F2(
 var $author$project$Shape$isFull = function (cell) {
 	return _Utils_eq(cell, $author$project$Shape$Full) ? true : false;
 };
-var $author$project$Shape$cellPositions = function (shape) {
-	var isFullPos = function (_v1) {
-		var cell = _v1.c;
+var $author$project$Shape$cellPositions = function (_v0) {
+	var shape = _v0.c;
+	var isFullPos = function (_v2) {
+		var cell = _v2.c;
 		return $author$project$Shape$isFull(cell);
 	};
 	var cells = $elm$core$List$concat(
@@ -6428,9 +6591,9 @@ var $author$project$Shape$cellPositions = function (shape) {
 			shape));
 	return A2(
 		$elm$core$List$map,
-		function (_v0) {
-			var i = _v0.a;
-			var j = _v0.b;
+		function (_v1) {
+			var i = _v1.a;
+			var j = _v1.b;
 			return _Utils_Tuple2(i, j);
 		},
 		A2($elm$core$List$filter, isFullPos, cells));
@@ -6453,19 +6616,9 @@ var $author$project$Playfield$isPossiblePosition = F2(
 	function (tetromino, grid) {
 		return A3(
 			$author$project$Playfield$countCellAtState,
-			$author$project$Playfield$Empty,
+			$author$project$Playfield$isEmptyCell,
 			$author$project$Tetromino$positions(tetromino),
 			grid) === 4;
-	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
 	});
 var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
 var $elm$core$Array$setHelp = F4(
@@ -6511,15 +6664,6 @@ var $elm$core$Array$set = F3(
 			tail));
 	});
 var $author$project$Playfield$updateRow = $elm$core$Array$set;
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
 var $author$project$Playfield$setCellState = F3(
 	function (state, _v0, grid) {
 		var i = _v0.a;
@@ -6539,7 +6683,8 @@ var $author$project$Playfield$setCellState = F3(
 				updatedRow));
 	});
 var $author$project$Playfield$projectTetrominoToGrid = F3(
-	function (cell, tetromino, grid) {
+	function (cell, tetromino, _v0) {
+		var grid = _v0.b;
 		return A2(
 			$author$project$Playfield$PlayField,
 			$elm$core$Maybe$Just(tetromino),
@@ -6549,10 +6694,6 @@ var $author$project$Playfield$projectTetrominoToGrid = F3(
 				grid,
 				$author$project$Tetromino$positions(tetromino)));
 	});
-var $author$project$Playfield$retrieveGrid = function (_v0) {
-	var grid = _v0.b;
-	return grid;
-};
 var $elm$core$List$repeatHelp = F3(
 	function (result, n, value) {
 		repeatHelp:
@@ -6575,8 +6716,8 @@ var $elm$core$List$repeat = F2(
 		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
 	});
 var $author$project$Playfield$tryWallKick = F4(
-	function (wallKick, command, tetromino, grid) {
-		var moveFn = function () {
+	function (wallKick, command, tetromino, playfield) {
+		var doWallKickFn = function () {
 			if (wallKick.$ === 'LeftWallKick') {
 				var i = wallKick.a;
 				return A3(
@@ -6606,17 +6747,15 @@ var $author$project$Playfield$tryWallKick = F4(
 				return $author$project$Tetromino$rotateTetrominoRight;
 			}
 		}()(
-			moveFn(tetromino));
-		var cleanedField = A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Empty, tetromino, grid);
+			doWallKickFn(tetromino));
+		var cleanedField = A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Empty, tetromino, playfield);
 		var isPossible = A2($author$project$Playfield$isPossiblePosition, updatedTetromino, cleanedField);
 		return isPossible ? A3(
 			$author$project$Playfield$projectTetrominoToGrid,
-			$author$project$Playfield$Moving,
+			$author$project$Playfield$Moving(
+				$author$project$Tetromino$getColor(updatedTetromino)),
 			updatedTetromino,
-			$author$project$Playfield$retrieveGrid(cleanedField)) : A2(
-			$author$project$Playfield$PlayField,
-			$elm$core$Maybe$Just(tetromino),
-			grid);
+			cleanedField) : playfield;
 	});
 var $author$project$Tetromino$LeftWallKick = function (a) {
 	return {$: 'LeftWallKick', a: a};
@@ -6627,7 +6766,10 @@ var $author$project$Tetromino$RightWallKick = function (a) {
 var $elm$core$Basics$negate = function (n) {
 	return -n;
 };
-var $author$project$Shape$shapeSize = $elm$core$List$length;
+var $author$project$Shape$shapeSize = function (_v0) {
+	var shape = _v0.c;
+	return $elm$core$List$length(shape);
+};
 var $author$project$Tetromino$whichWallKickToAttempt = function (_v0) {
 	var shape = _v0.a;
 	var _v1 = _v0.b;
@@ -6638,47 +6780,75 @@ var $author$project$Tetromino$whichWallKickToAttempt = function (_v0) {
 			(j + $author$project$Shape$shapeSize(shape)) - 10)) : $elm$core$Maybe$Nothing);
 };
 var $author$project$Playfield$applyCommandOnTetromino = F3(
-	function (command, tetromino, grid) {
-		var updatedTetromino = A2($author$project$Tetromino$applyCommand, command, tetromino);
-		var cleanedField = A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Empty, tetromino, grid);
-		var isPossible = A2($author$project$Playfield$isPossiblePosition, updatedTetromino, cleanedField);
-		var _v0 = _Utils_Tuple2(command, isPossible);
-		if (_v0.b) {
-			if (_v0.a.$ === 'Rotate') {
-				return A3(
-					$author$project$Playfield$projectTetrominoToGrid,
-					$author$project$Playfield$Moving,
-					updatedTetromino,
-					$author$project$Playfield$retrieveGrid(cleanedField));
-			} else {
-				return A3(
-					$author$project$Playfield$projectTetrominoToGrid,
-					$author$project$Playfield$Moving,
-					updatedTetromino,
-					$author$project$Playfield$retrieveGrid(cleanedField));
-			}
-		} else {
-			if (_v0.a.$ === 'Rotate') {
-				var rotateCommand = _v0.a.a;
-				var _v1 = $author$project$Tetromino$whichWallKickToAttempt(tetromino);
-				if (_v1.$ === 'Nothing') {
-					return A2(
-						$author$project$Playfield$PlayField,
-						$elm$core$Maybe$Just(tetromino),
-						grid);
-				} else {
-					var wallKick = _v1.a;
-					return A4($author$project$Playfield$tryWallKick, wallKick, rotateCommand, tetromino, grid);
+	function (command, tetromino, playfield) {
+		applyCommandOnTetromino:
+		while (true) {
+			var updatedTetromino = A2($author$project$Tetromino$applyCommand, command, tetromino);
+			var cleanedField = A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Empty, tetromino, playfield);
+			var isPossible = A2($author$project$Playfield$isPossiblePosition, updatedTetromino, cleanedField);
+			var _v0 = _Utils_Tuple2(command, isPossible);
+			if (!_v0.b) {
+				switch (_v0.a.$) {
+					case 'Drop':
+						var _v2 = _v0.a;
+						return A3(
+							$author$project$Playfield$projectTetrominoToGrid,
+							$author$project$Playfield$Moving(
+								$author$project$Tetromino$getColor(updatedTetromino)),
+							tetromino,
+							cleanedField);
+					case 'Rotate':
+						var rotateCommand = _v0.a.a;
+						var _v3 = $author$project$Tetromino$whichWallKickToAttempt(tetromino);
+						if (_v3.$ === 'Nothing') {
+							return playfield;
+						} else {
+							var wallKick = _v3.a;
+							return A4($author$project$Playfield$tryWallKick, wallKick, rotateCommand, tetromino, playfield);
+						}
+					default:
+						return playfield;
 				}
 			} else {
-				return A2(
-					$author$project$Playfield$PlayField,
-					$elm$core$Maybe$Just(tetromino),
-					grid);
+				switch (_v0.a.$) {
+					case 'Drop':
+						var _v1 = _v0.a;
+						var $temp$command = $author$project$Tetromino$Drop,
+							$temp$tetromino = updatedTetromino,
+							$temp$playfield = cleanedField;
+						command = $temp$command;
+						tetromino = $temp$tetromino;
+						playfield = $temp$playfield;
+						continue applyCommandOnTetromino;
+					case 'Rotate':
+						return A3(
+							$author$project$Playfield$projectTetrominoToGrid,
+							$author$project$Playfield$Moving(
+								$author$project$Tetromino$getColor(updatedTetromino)),
+							updatedTetromino,
+							cleanedField);
+					default:
+						return A3(
+							$author$project$Playfield$projectTetrominoToGrid,
+							$author$project$Playfield$Moving(
+								$author$project$Tetromino$getColor(updatedTetromino)),
+							updatedTetromino,
+							cleanedField);
+				}
 			}
 		}
 	});
-var $author$project$Playfield$Fixed = {$: 'Fixed'};
+var $author$project$Playfield$applyCommand = F2(
+	function (command, playfield) {
+		if (playfield.a.$ === 'Just') {
+			var tetromino = playfield.a.a;
+			return A3($author$project$Playfield$applyCommandOnTetromino, command, tetromino, playfield);
+		} else {
+			var p = playfield;
+			var _v1 = p.a;
+			return p;
+		}
+	});
 var $elm$core$Array$repeat = F2(
 	function (n, e) {
 		return A2(
@@ -6753,20 +6923,22 @@ var $elm$core$List$all = F2(
 			A2($elm$core$Basics$composeL, $elm$core$Basics$not, isOkay),
 			list);
 	});
-var $author$project$Playfield$isRowFullOf = function (cell) {
-	return A2(
-		$elm$core$Basics$composeL,
-		$elm$core$List$all(
-			function (c) {
-				return _Utils_eq(c, cell);
-			}),
-		$elm$core$Array$toList);
+var $author$project$Playfield$isFixedCell = function (cell) {
+	if (cell.$ === 'Fixed') {
+		return true;
+	} else {
+		return false;
+	}
 };
+var $author$project$Playfield$isRowFull = A2(
+	$elm$core$Basics$composeL,
+	$elm$core$List$all($author$project$Playfield$isFixedCell),
+	$elm$core$Array$toList);
 var $author$project$Playfield$removeFullRows = F3(
 	function (previous, _new, numberOfRemovedLines) {
 		var cleanRow = F2(
 			function (head, rest) {
-				return A2($author$project$Playfield$isRowFullOf, $author$project$Playfield$Fixed, head) ? A3($author$project$Playfield$removeFullRows, rest, _new, numberOfRemovedLines + 1) : A3(
+				return $author$project$Playfield$isRowFull(head) ? A3($author$project$Playfield$removeFullRows, rest, _new, numberOfRemovedLines + 1) : A3(
 					$author$project$Playfield$removeFullRows,
 					rest,
 					A2($elm$core$List$cons, head, _new),
@@ -6809,14 +6981,6 @@ var $elm$core$Tuple$mapSecond = F2(
 			x,
 			func(y));
 	});
-var $author$project$Playfield$fixPieceFallingDown = F2(
-	function (tetromino, grid) {
-		return A2(
-			$elm$core$Tuple$mapSecond,
-			$elm$core$Maybe$Just,
-			$author$project$Playfield$cleanFullLinesAndRemoveTetromino(
-				A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Fixed, tetromino, grid)));
-	});
 var $author$project$Tetromino$samePosition = F2(
 	function (_v0, _v2) {
 		var _v1 = _v0.b;
@@ -6828,12 +6992,11 @@ var $author$project$Tetromino$samePosition = F2(
 		return _Utils_eq(a, c) && _Utils_eq(b, d);
 	});
 var $author$project$Playfield$tetrominoFallDown = F2(
-	function (tetromino, grid) {
-		var _v0 = A3(
-			$author$project$Playfield$applyCommandOnTetromino,
+	function (tetromino, playfield) {
+		var _v0 = A2(
+			$author$project$Playfield$applyCommand,
 			$author$project$Tetromino$Move($author$project$Tetromino$MoveDown),
-			tetromino,
-			grid);
+			playfield);
 		var updatedTetromino = _v0.a;
 		var updatedGrid = _v0.b;
 		return A2(
@@ -6842,7 +7005,16 @@ var $author$project$Playfield$tetrominoFallDown = F2(
 			A2(
 				$elm$core$Maybe$map,
 				$author$project$Tetromino$samePosition(tetromino),
-				updatedTetromino)) ? A2($author$project$Playfield$fixPieceFallingDown, tetromino, updatedGrid) : _Utils_Tuple2(
+				updatedTetromino)) ? A2(
+			$elm$core$Tuple$mapSecond,
+			$elm$core$Maybe$Just,
+			$author$project$Playfield$cleanFullLinesAndRemoveTetromino(
+				A3(
+					$author$project$Playfield$projectTetrominoToGrid,
+					$author$project$Playfield$Fixed(
+						$author$project$Tetromino$getColor(tetromino)),
+					tetromino,
+					playfield))) : _Utils_Tuple2(
 			A2($author$project$Playfield$PlayField, updatedTetromino, updatedGrid),
 			$elm$core$Maybe$Nothing);
 	});
@@ -6855,13 +7027,12 @@ var $author$project$Playfield$makeTetrominoFallDown = function (_v0) {
 			$elm$core$Maybe$Nothing);
 	} else {
 		var t = tetromino.a;
-		return A2($author$project$Playfield$tetrominoFallDown, t, grid);
+		return A2(
+			$author$project$Playfield$tetrominoFallDown,
+			t,
+			A2($author$project$Playfield$PlayField, tetromino, grid));
 	}
 };
-var $author$project$Tetris$updateScore = F2(
-	function (score, numberOfRemovedLines) {
-		return numberOfRemovedLines + score;
-	});
 var $author$project$Tetris$makePieceFallDown = function (_v0) {
 	var field = _v0.a;
 	var shapes = _v0.b;
@@ -6881,7 +7052,7 @@ var $author$project$Tetris$makePieceFallDown = function (_v0) {
 				$author$project$Tetris$Tetris,
 				updatedField,
 				shapes,
-				A2($author$project$Tetris$updateScore, score, numberOfRemovedLines)),
+				A2($author$project$Tetris$addRemovedLinesToScoring, numberOfRemovedLines, score)),
 			$author$project$Tetris$SpawnRandomShape(shapes));
 	}
 };
@@ -6988,18 +7159,6 @@ var $author$project$Main$applyGameLoop = function (tetris) {
 		return _Utils_Tuple2(updatedTetris, $elm$core$Platform$Cmd$none);
 	}
 };
-var $author$project$Playfield$applyCommand = F2(
-	function (command, playfield) {
-		if (playfield.a.$ === 'Just') {
-			var tetromino = playfield.a.a;
-			var grid = playfield.b;
-			return A3($author$project$Playfield$applyCommandOnTetromino, command, tetromino, grid);
-		} else {
-			var p = playfield;
-			var _v1 = p.a;
-			return p;
-		}
-	});
 var $author$project$Tetris$applyTetrominoCommand = F2(
 	function (tetrominoCommand, _v0) {
 		var field = _v0.a;
@@ -7440,7 +7599,7 @@ var $author$project$Main$keyToTetrisCommand = function (rawKey) {
 						$author$project$Tetromino$Rotate($author$project$Tetromino$RotateRight));
 				case 'Spacebar':
 					var _v7 = _v0.a;
-					return $elm$core$Maybe$Nothing;
+					return $elm$core$Maybe$Just($author$project$Tetromino$Drop);
 				default:
 					break _v0$7;
 			}
@@ -7483,10 +7642,18 @@ var $author$project$Playfield$spawnTetromino = F2(
 		return A2($author$project$Playfield$isPossiblePosition, tetromino, field) ? _Utils_Tuple2(
 			A3(
 				$author$project$Playfield$projectTetrominoToGrid,
-				$author$project$Playfield$Moving,
+				$author$project$Playfield$Moving(
+					$author$project$Tetromino$getColor(tetromino)),
 				tetromino,
-				$author$project$Playfield$retrieveGrid(field)),
-			$author$project$Playfield$Playable) : _Utils_Tuple2(field, $author$project$Playfield$Full);
+				field),
+			$author$project$Playfield$Playable) : _Utils_Tuple2(
+			A3(
+				$author$project$Playfield$projectTetrominoToGrid,
+				$author$project$Playfield$Fixed(
+					$author$project$Tetromino$getColor(tetromino)),
+				tetromino,
+				field),
+			$author$project$Playfield$Full);
 	});
 var $author$project$Tetris$spawnTetromino = F3(
 	function (shape, availableShapes, _v0) {
@@ -7520,18 +7687,19 @@ var $author$project$Main$spawnTetromino = F3(
 			var updatedTetris = _v0.a;
 			var _v2 = _v0.b;
 			return _Utils_Tuple2(
-				$author$project$Main$Started(updatedTetris),
+				$author$project$Main$Playing(updatedTetris),
 				$elm$core$Platform$Cmd$none);
 		}
 	});
-var $author$project$Playfield$createGrid = A2($elm$core$Array$repeat, 20, $author$project$Playfield$createRow);
+var $author$project$Playfield$createGrid = A2($elm$core$Array$repeat, 22, $author$project$Playfield$createRow);
 var $author$project$Playfield$createPlayfield = A2($author$project$Playfield$PlayField, $elm$core$Maybe$Nothing, $author$project$Playfield$createGrid);
-var $author$project$Tetris$startTetris = A3($author$project$Tetris$Tetris, $author$project$Playfield$createPlayfield, $author$project$Shape$allShapes, 0);
+var $author$project$Tetris$initScoring = A3($author$project$Tetris$Scoring, 0, 1, 0);
+var $author$project$Tetris$startTetris = A3($author$project$Tetris$Tetris, $author$project$Playfield$createPlayfield, $author$project$Shape$allShapes, $author$project$Tetris$initScoring);
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'StartGame') {
 			return _Utils_Tuple2(
-				$author$project$Main$Started($author$project$Tetris$startTetris),
+				$author$project$Main$Playing($author$project$Tetris$startTetris),
 				A2(
 					$elm$random$Random$generate,
 					$author$project$Main$SpawnTetromino,
@@ -7547,7 +7715,7 @@ var $author$project$Main$update = F2(
 					switch (msg.$) {
 						case 'StartGame':
 							return _Utils_Tuple2(
-								$author$project$Main$Started($author$project$Tetris$startTetris),
+								$author$project$Main$Playing($author$project$Tetris$startTetris),
 								A2(
 									$elm$random$Random$generate,
 									$author$project$Main$SpawnTetromino,
@@ -7555,13 +7723,13 @@ var $author$project$Main$update = F2(
 						case 'KeyDown':
 							var rawKey = msg.a;
 							return _Utils_Tuple2(
-								$author$project$Main$Started(
+								$author$project$Main$Playing(
 									A2($author$project$Main$applyKeyPress, tetris, rawKey)),
 								$elm$core$Platform$Cmd$none);
 						case 'Tick':
 							return A2(
 								$elm$core$Tuple$mapFirst,
-								$author$project$Main$Started,
+								$author$project$Main$Playing,
 								$author$project$Main$applyGameLoop(tetris));
 						default:
 							if (msg.a.a.$ === 'Nothing') {
@@ -7594,6 +7762,13 @@ var $rtfeldman$elm_css$Css$property = F2(
 var $rtfeldman$elm_css$Css$backgroundColor = function (c) {
 	return A2($rtfeldman$elm_css$Css$property, 'background-color', c.value);
 };
+var $rtfeldman$elm_css$Css$Structure$Compatible = {$: 'Compatible'};
+var $rtfeldman$elm_css$Css$borderBox = {backgroundClip: $rtfeldman$elm_css$Css$Structure$Compatible, boxSizing: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'border-box'};
+var $rtfeldman$elm_css$Css$prop1 = F2(
+	function (key, arg) {
+		return A2($rtfeldman$elm_css$Css$property, key, arg.value);
+	});
+var $rtfeldman$elm_css$Css$boxSizing = $rtfeldman$elm_css$Css$prop1('box-sizing');
 var $rtfeldman$elm_css$Css$prop3 = F4(
 	function (key, argA, argB, argC) {
 		return A2(
@@ -7606,13 +7781,416 @@ var $rtfeldman$elm_css$Css$prop3 = F4(
 					[argA.value, argB.value, argC.value])));
 	});
 var $rtfeldman$elm_css$Css$border3 = $rtfeldman$elm_css$Css$prop3('border');
-var $rtfeldman$elm_css$Css$Structure$Compatible = {$: 'Compatible'};
-var $rtfeldman$elm_css$Css$borderBox = {backgroundClip: $rtfeldman$elm_css$Css$Structure$Compatible, boxSizing: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'border-box'};
-var $rtfeldman$elm_css$Css$prop1 = F2(
-	function (key, arg) {
-		return A2($rtfeldman$elm_css$Css$property, key, arg.value);
+var $elm$core$String$cons = _String_cons;
+var $rtfeldman$elm_css$Css$withPrecedingHash = function (str) {
+	return A2($elm$core$String$startsWith, '#', str) ? str : A2(
+		$elm$core$String$cons,
+		_Utils_chr('#'),
+		str);
+};
+var $rtfeldman$elm_css$Css$erroneousHex = function (str) {
+	return {
+		alpha: 1,
+		blue: 0,
+		color: $rtfeldman$elm_css$Css$Structure$Compatible,
+		green: 0,
+		red: 0,
+		value: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+	};
+};
+var $elm$core$String$fromList = _String_fromList;
+var $elm$core$String$fromChar = function (_char) {
+	return A2($elm$core$String$cons, _char, '');
+};
+var $rtfeldman$elm_hex$Hex$fromStringHelp = F3(
+	function (position, chars, accumulated) {
+		fromStringHelp:
+		while (true) {
+			if (!chars.b) {
+				return $elm$core$Result$Ok(accumulated);
+			} else {
+				var _char = chars.a;
+				var rest = chars.b;
+				switch (_char.valueOf()) {
+					case '0':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated;
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '1':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + A2($elm$core$Basics$pow, 16, position);
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '2':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (2 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '3':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (3 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '4':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (4 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '5':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (5 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '6':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (6 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '7':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (7 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '8':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (8 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case '9':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (9 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'a':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (10 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'b':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (11 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'c':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (12 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'd':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (13 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'e':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (14 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					case 'f':
+						var $temp$position = position - 1,
+							$temp$chars = rest,
+							$temp$accumulated = accumulated + (15 * A2($elm$core$Basics$pow, 16, position));
+						position = $temp$position;
+						chars = $temp$chars;
+						accumulated = $temp$accumulated;
+						continue fromStringHelp;
+					default:
+						var nonHex = _char;
+						return $elm$core$Result$Err(
+							$elm$core$String$fromChar(nonHex) + ' is not a valid hexadecimal character.');
+				}
+			}
+		}
 	});
-var $rtfeldman$elm_css$Css$boxSizing = $rtfeldman$elm_css$Css$prop1('box-sizing');
+var $elm$core$Result$map = F2(
+	function (func, ra) {
+		if (ra.$ === 'Ok') {
+			var a = ra.a;
+			return $elm$core$Result$Ok(
+				func(a));
+		} else {
+			var e = ra.a;
+			return $elm$core$Result$Err(e);
+		}
+	});
+var $elm$core$Result$mapError = F2(
+	function (f, result) {
+		if (result.$ === 'Ok') {
+			var v = result.a;
+			return $elm$core$Result$Ok(v);
+		} else {
+			var e = result.a;
+			return $elm$core$Result$Err(
+				f(e));
+		}
+	});
+var $elm$core$List$tail = function (list) {
+	if (list.b) {
+		var x = list.a;
+		var xs = list.b;
+		return $elm$core$Maybe$Just(xs);
+	} else {
+		return $elm$core$Maybe$Nothing;
+	}
+};
+var $rtfeldman$elm_hex$Hex$fromString = function (str) {
+	if ($elm$core$String$isEmpty(str)) {
+		return $elm$core$Result$Err('Empty strings are not valid hexadecimal strings.');
+	} else {
+		var result = function () {
+			if (A2($elm$core$String$startsWith, '-', str)) {
+				var list = A2(
+					$elm$core$Maybe$withDefault,
+					_List_Nil,
+					$elm$core$List$tail(
+						$elm$core$String$toList(str)));
+				return A2(
+					$elm$core$Result$map,
+					$elm$core$Basics$negate,
+					A3(
+						$rtfeldman$elm_hex$Hex$fromStringHelp,
+						$elm$core$List$length(list) - 1,
+						list,
+						0));
+			} else {
+				return A3(
+					$rtfeldman$elm_hex$Hex$fromStringHelp,
+					$elm$core$String$length(str) - 1,
+					$elm$core$String$toList(str),
+					0);
+			}
+		}();
+		var formatError = function (err) {
+			return A2(
+				$elm$core$String$join,
+				' ',
+				_List_fromArray(
+					['\"' + (str + '\"'), 'is not a valid hexadecimal string because', err]));
+		};
+		return A2($elm$core$Result$mapError, formatError, result);
+	}
+};
+var $elm$core$String$toLower = _String_toLower;
+var $rtfeldman$elm_css$Css$validHex = F5(
+	function (str, _v0, _v1, _v2, _v3) {
+		var r1 = _v0.a;
+		var r2 = _v0.b;
+		var g1 = _v1.a;
+		var g2 = _v1.b;
+		var b1 = _v2.a;
+		var b2 = _v2.b;
+		var a1 = _v3.a;
+		var a2 = _v3.b;
+		var toResult = A2(
+			$elm$core$Basics$composeR,
+			$elm$core$String$fromList,
+			A2($elm$core$Basics$composeR, $elm$core$String$toLower, $rtfeldman$elm_hex$Hex$fromString));
+		var results = _Utils_Tuple2(
+			_Utils_Tuple2(
+				toResult(
+					_List_fromArray(
+						[r1, r2])),
+				toResult(
+					_List_fromArray(
+						[g1, g2]))),
+			_Utils_Tuple2(
+				toResult(
+					_List_fromArray(
+						[b1, b2])),
+				toResult(
+					_List_fromArray(
+						[a1, a2]))));
+		if ((((results.a.a.$ === 'Ok') && (results.a.b.$ === 'Ok')) && (results.b.a.$ === 'Ok')) && (results.b.b.$ === 'Ok')) {
+			var _v5 = results.a;
+			var red = _v5.a.a;
+			var green = _v5.b.a;
+			var _v6 = results.b;
+			var blue = _v6.a.a;
+			var alpha = _v6.b.a;
+			return {
+				alpha: alpha / 255,
+				blue: blue,
+				color: $rtfeldman$elm_css$Css$Structure$Compatible,
+				green: green,
+				red: red,
+				value: $rtfeldman$elm_css$Css$withPrecedingHash(str)
+			};
+		} else {
+			return $rtfeldman$elm_css$Css$erroneousHex(str);
+		}
+	});
+var $rtfeldman$elm_css$Css$hex = function (str) {
+	var withoutHash = A2($elm$core$String$startsWith, '#', str) ? A2($elm$core$String$dropLeft, 1, str) : str;
+	var _v0 = $elm$core$String$toList(withoutHash);
+	_v0$4:
+	while (true) {
+		if ((_v0.b && _v0.b.b) && _v0.b.b.b) {
+			if (!_v0.b.b.b.b) {
+				var r = _v0.a;
+				var _v1 = _v0.b;
+				var g = _v1.a;
+				var _v2 = _v1.b;
+				var b = _v2.a;
+				return A5(
+					$rtfeldman$elm_css$Css$validHex,
+					str,
+					_Utils_Tuple2(r, r),
+					_Utils_Tuple2(g, g),
+					_Utils_Tuple2(b, b),
+					_Utils_Tuple2(
+						_Utils_chr('f'),
+						_Utils_chr('f')));
+			} else {
+				if (!_v0.b.b.b.b.b) {
+					var r = _v0.a;
+					var _v3 = _v0.b;
+					var g = _v3.a;
+					var _v4 = _v3.b;
+					var b = _v4.a;
+					var _v5 = _v4.b;
+					var a = _v5.a;
+					return A5(
+						$rtfeldman$elm_css$Css$validHex,
+						str,
+						_Utils_Tuple2(r, r),
+						_Utils_Tuple2(g, g),
+						_Utils_Tuple2(b, b),
+						_Utils_Tuple2(a, a));
+				} else {
+					if (_v0.b.b.b.b.b.b) {
+						if (!_v0.b.b.b.b.b.b.b) {
+							var r1 = _v0.a;
+							var _v6 = _v0.b;
+							var r2 = _v6.a;
+							var _v7 = _v6.b;
+							var g1 = _v7.a;
+							var _v8 = _v7.b;
+							var g2 = _v8.a;
+							var _v9 = _v8.b;
+							var b1 = _v9.a;
+							var _v10 = _v9.b;
+							var b2 = _v10.a;
+							return A5(
+								$rtfeldman$elm_css$Css$validHex,
+								str,
+								_Utils_Tuple2(r1, r2),
+								_Utils_Tuple2(g1, g2),
+								_Utils_Tuple2(b1, b2),
+								_Utils_Tuple2(
+									_Utils_chr('f'),
+									_Utils_chr('f')));
+						} else {
+							if (_v0.b.b.b.b.b.b.b.b && (!_v0.b.b.b.b.b.b.b.b.b)) {
+								var r1 = _v0.a;
+								var _v11 = _v0.b;
+								var r2 = _v11.a;
+								var _v12 = _v11.b;
+								var g1 = _v12.a;
+								var _v13 = _v12.b;
+								var g2 = _v13.a;
+								var _v14 = _v13.b;
+								var b1 = _v14.a;
+								var _v15 = _v14.b;
+								var b2 = _v15.a;
+								var _v16 = _v15.b;
+								var a1 = _v16.a;
+								var _v17 = _v16.b;
+								var a2 = _v17.a;
+								return A5(
+									$rtfeldman$elm_css$Css$validHex,
+									str,
+									_Utils_Tuple2(r1, r2),
+									_Utils_Tuple2(g1, g2),
+									_Utils_Tuple2(b1, b2),
+									_Utils_Tuple2(a1, a2));
+							} else {
+								break _v0$4;
+							}
+						}
+					} else {
+						break _v0$4;
+					}
+				}
+			}
+		} else {
+			break _v0$4;
+		}
+	}
+	return $rtfeldman$elm_css$Css$erroneousHex(str);
+};
+var $rtfeldman$elm_css$Css$PxUnits = {$: 'PxUnits'};
+var $elm$core$String$fromFloat = _String_fromNumber;
+var $rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
+	function (units, unitLabel, numericValue) {
+		return {
+			absoluteLength: $rtfeldman$elm_css$Css$Structure$Compatible,
+			calc: $rtfeldman$elm_css$Css$Structure$Compatible,
+			flexBasis: $rtfeldman$elm_css$Css$Structure$Compatible,
+			fontSize: $rtfeldman$elm_css$Css$Structure$Compatible,
+			length: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrAuto: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrAutoOrCoverOrContain: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNone: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNoneOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNumber: $rtfeldman$elm_css$Css$Structure$Compatible,
+			lengthOrNumberOrAutoOrNoneOrContent: $rtfeldman$elm_css$Css$Structure$Compatible,
+			numericValue: numericValue,
+			textIndent: $rtfeldman$elm_css$Css$Structure$Compatible,
+			unitLabel: unitLabel,
+			units: units,
+			value: _Utils_ap(
+				$elm$core$String$fromFloat(numericValue),
+				unitLabel)
+		};
+	});
+var $rtfeldman$elm_css$Css$px = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PxUnits, 'px');
 var $rtfeldman$elm_css$Css$cssFunction = F2(
 	function (funcName, args) {
 		return funcName + ('(' + (A2($elm$core$String$join, ', ', args) + ')'));
@@ -7635,14 +8213,33 @@ var $rtfeldman$elm_css$Css$rgb = F3(
 						[r, g, b])))
 		};
 	});
+var $rtfeldman$elm_css$Css$solid = {borderStyle: $rtfeldman$elm_css$Css$Structure$Compatible, textDecorationStyle: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'solid'};
+var $author$project$Main$cellBorder = function (cell) {
+	if (cell.$ === 'Moving') {
+		var color = cell.a;
+		return A3(
+			$rtfeldman$elm_css$Css$border3,
+			$rtfeldman$elm_css$Css$px(0.1),
+			$rtfeldman$elm_css$Css$solid,
+			$rtfeldman$elm_css$Css$hex(color));
+	} else {
+		return A3(
+			$rtfeldman$elm_css$Css$border3,
+			$rtfeldman$elm_css$Css$px(0.1),
+			$rtfeldman$elm_css$Css$solid,
+			A3($rtfeldman$elm_css$Css$rgb, 0, 0, 0));
+	}
+};
 var $author$project$Main$cellColor = function (cell) {
 	switch (cell.$) {
 		case 'Moving':
-			return A3($rtfeldman$elm_css$Css$rgb, 150, 150, 150);
+			var color = cell.a;
+			return $rtfeldman$elm_css$Css$hex(color);
 		case 'Fixed':
-			return A3($rtfeldman$elm_css$Css$rgb, 0, 0, 0);
+			var color = cell.a;
+			return $rtfeldman$elm_css$Css$hex(color);
 		default:
-			return A3($rtfeldman$elm_css$Css$rgb, 255, 255, 255);
+			return $rtfeldman$elm_css$Css$hex('ffffff');
 	}
 };
 var $rtfeldman$elm_css$VirtualDom$Styled$Attribute = F3(
@@ -8439,7 +9036,6 @@ var $rtfeldman$elm_css$Css$Structure$concatMapLastStyleBlock = F2(
 			first,
 			A2($rtfeldman$elm_css$Css$Structure$concatMapLastStyleBlock, update, rest));
 	});
-var $elm$core$String$cons = _String_cons;
 var $Skinney$murmur3$Murmur3$HashData = F4(
 	function (shift, seed, hash, charsProcessed) {
 		return {charsProcessed: charsProcessed, hash: hash, seed: seed, shift: shift};
@@ -8511,7 +9107,6 @@ var $Skinney$murmur3$Murmur3$hashString = F2(
 				str));
 	});
 var $rtfeldman$elm_css$Hash$murmurSeed = 15739;
-var $elm$core$String$fromList = _String_fromList;
 var $elm$core$Basics$modBy = _Basics_modBy;
 var $rtfeldman$elm_hex$Hex$unsafeToDigit = function (num) {
 	unsafeToDigit:
@@ -8687,15 +9282,6 @@ var $rtfeldman$elm_css$Css$Structure$styleBlockToMediaRule = F2(
 			return declaration;
 		}
 	});
-var $elm$core$List$tail = function (list) {
-	if (list.b) {
-		var x = list.a;
-		var xs = list.b;
-		return $elm$core$Maybe$Just(xs);
-	} else {
-		return $elm$core$Maybe$Nothing;
-	}
-};
 var $rtfeldman$elm_css$Css$Preprocess$Resolve$toDocumentRule = F5(
 	function (str1, str2, str3, str4, declaration) {
 		if (declaration.$ === 'StyleBlockDeclaration') {
@@ -9202,35 +9788,7 @@ var $rtfeldman$elm_css$Html$Styled$div = $rtfeldman$elm_css$Html$Styled$node('di
 var $rtfeldman$elm_css$Css$height = $rtfeldman$elm_css$Css$prop1('height');
 var $rtfeldman$elm_css$Css$inlineBlock = {display: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'inline-block'};
 var $rtfeldman$elm_css$Css$PercentageUnits = {$: 'PercentageUnits'};
-var $elm$core$String$fromFloat = _String_fromNumber;
-var $rtfeldman$elm_css$Css$Internal$lengthConverter = F3(
-	function (units, unitLabel, numericValue) {
-		return {
-			absoluteLength: $rtfeldman$elm_css$Css$Structure$Compatible,
-			calc: $rtfeldman$elm_css$Css$Structure$Compatible,
-			flexBasis: $rtfeldman$elm_css$Css$Structure$Compatible,
-			fontSize: $rtfeldman$elm_css$Css$Structure$Compatible,
-			length: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrAuto: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrAutoOrCoverOrContain: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNone: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNoneOrMinMaxDimension: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNumber: $rtfeldman$elm_css$Css$Structure$Compatible,
-			lengthOrNumberOrAutoOrNoneOrContent: $rtfeldman$elm_css$Css$Structure$Compatible,
-			numericValue: numericValue,
-			textIndent: $rtfeldman$elm_css$Css$Structure$Compatible,
-			unitLabel: unitLabel,
-			units: units,
-			value: _Utils_ap(
-				$elm$core$String$fromFloat(numericValue),
-				unitLabel)
-		};
-	});
 var $rtfeldman$elm_css$Css$pct = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PercentageUnits, '%');
-var $rtfeldman$elm_css$Css$PxUnits = {$: 'PxUnits'};
-var $rtfeldman$elm_css$Css$px = A2($rtfeldman$elm_css$Css$Internal$lengthConverter, $rtfeldman$elm_css$Css$PxUnits, 'px');
-var $rtfeldman$elm_css$Css$solid = {borderStyle: $rtfeldman$elm_css$Css$Structure$Compatible, textDecorationStyle: $rtfeldman$elm_css$Css$Structure$Compatible, value: 'solid'};
 var $rtfeldman$elm_css$Css$width = $rtfeldman$elm_css$Css$prop1('width');
 var $author$project$Main$buildCell = function (cell) {
 	return A2(
@@ -9246,11 +9804,7 @@ var $author$project$Main$buildCell = function (cell) {
 						$rtfeldman$elm_css$Css$height(
 						$rtfeldman$elm_css$Css$pct(100)),
 						$rtfeldman$elm_css$Css$boxSizing($rtfeldman$elm_css$Css$borderBox),
-						A3(
-						$rtfeldman$elm_css$Css$border3,
-						$rtfeldman$elm_css$Css$px(0.1),
-						$rtfeldman$elm_css$Css$solid,
-						A3($rtfeldman$elm_css$Css$rgb, 0, 0, 0)),
+						$author$project$Main$cellBorder(cell),
 						$rtfeldman$elm_css$Css$backgroundColor(
 						$author$project$Main$cellColor(cell))
 					]))
@@ -9284,9 +9838,20 @@ var $author$project$Main$buildGrid = function (grid) {
 		A2(
 			$elm$core$List$map,
 			$author$project$Main$buildRow,
-			$elm$core$Array$toList(grid)));
+			A2(
+				$elm$core$List$drop,
+				2,
+				$elm$core$Array$toList(grid))));
 };
 var $rtfeldman$elm_css$Html$Styled$button = $rtfeldman$elm_css$Html$Styled$node('button');
+var $rtfeldman$elm_css$Html$Styled$header = $rtfeldman$elm_css$Html$Styled$node('header');
+var $elm$core$Debug$toString = _Debug_toString;
+var $author$project$Tetris$levelToString = function (_v0) {
+	var _v1 = _v0.c;
+	var level = _v1.b;
+	return $elm$core$Debug$toString(level);
+};
+var $rtfeldman$elm_css$Html$Styled$nav = $rtfeldman$elm_css$Html$Styled$node('nav');
 var $elm$virtual_dom$VirtualDom$Normal = function (a) {
 	return {$: 'Normal', a: a};
 };
@@ -9316,6 +9881,15 @@ var $author$project$Tetris$retrieveField = function (_v0) {
 	var field = _v0.a;
 	return field;
 };
+var $author$project$Playfield$retrieveGrid = function (_v0) {
+	var grid = _v0.b;
+	return grid;
+};
+var $author$project$Tetris$scoreToString = function (_v0) {
+	var _v1 = _v0.c;
+	var score = _v1.a;
+	return $elm$core$Debug$toString(score);
+};
 var $rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
 	return {$: 'Unstyled', a: a};
 };
@@ -9329,7 +9903,7 @@ var $author$project$Main$buildGame = function (model) {
 	switch (model.$) {
 		case 'NotStarted':
 			return A2(
-				$rtfeldman$elm_css$Html$Styled$div,
+				$rtfeldman$elm_css$Html$Styled$nav,
 				_List_Nil,
 				_List_fromArray(
 					[
@@ -9351,18 +9925,59 @@ var $author$project$Main$buildGame = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Main$buildGrid(
-						$author$project$Playfield$retrieveGrid(
-							$author$project$Tetris$retrieveField(tetris))),
 						A2(
-						$rtfeldman$elm_css$Html$Styled$button,
+						$rtfeldman$elm_css$Html$Styled$header,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$StartGame)
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('restart game')
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$Main$buildGrid(
+										$author$project$Playfield$retrieveGrid(
+											$author$project$Tetris$retrieveField(tetris)))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('game over')
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										'Level ' + $author$project$Tetris$scoreToString(tetris))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										'Score ' + $author$project$Tetris$levelToString(tetris))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$button,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$StartGame)
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('restart game')
+											]))
+									]))
 							]))
 					]));
 		default:
@@ -9372,18 +9987,59 @@ var $author$project$Main$buildGame = function (model) {
 				_List_Nil,
 				_List_fromArray(
 					[
-						$author$project$Main$buildGrid(
-						$author$project$Playfield$retrieveGrid(
-							$author$project$Tetris$retrieveField(tetris))),
 						A2(
-						$rtfeldman$elm_css$Html$Styled$button,
+						$rtfeldman$elm_css$Html$Styled$header,
+						_List_Nil,
 						_List_fromArray(
 							[
-								$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$StartGame)
-							]),
-						_List_fromArray(
-							[
-								$rtfeldman$elm_css$Html$Styled$text('restart game')
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$author$project$Main$buildGrid(
+										$author$project$Playfield$retrieveGrid(
+											$author$project$Tetris$retrieveField(tetris)))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text('playing')
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										'Level ' + $author$project$Tetris$scoreToString(tetris))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										$rtfeldman$elm_css$Html$Styled$text(
+										'Score ' + $author$project$Tetris$levelToString(tetris))
+									])),
+								A2(
+								$rtfeldman$elm_css$Html$Styled$div,
+								_List_Nil,
+								_List_fromArray(
+									[
+										A2(
+										$rtfeldman$elm_css$Html$Styled$button,
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$Events$onClick($author$project$Main$StartGame)
+											]),
+										_List_fromArray(
+											[
+												$rtfeldman$elm_css$Html$Styled$text('restart game')
+											]))
+									]))
 							]))
 					]));
 	}

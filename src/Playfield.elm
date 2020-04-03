@@ -169,6 +169,12 @@ applyCommandOnTetromino command tetromino playfield =
             isPossiblePosition updatedTetromino cleanedField
     in
     case ( command, isPossible ) of
+        ( Drop, True ) ->
+            applyCommandOnTetromino Drop updatedTetromino cleanedField
+
+        ( Drop, False ) ->
+            projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) tetromino cleanedField
+
         ( T.Rotate _, True ) ->
             projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
@@ -180,11 +186,30 @@ applyCommandOnTetromino command tetromino playfield =
                 Just wallKick ->
                     tryWallKick wallKick rotateCommand tetromino playfield
 
-        ( _, True ) ->
+        ( T.Move _, True ) ->
             projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
-        ( _, False ) ->
+        _ ->
             playfield
+
+
+dropTetromino : Tetromino -> PlayField -> PlayField
+dropTetromino tetromino playfield =
+    let
+        updatedTetromino =
+            T.applyCommand Drop tetromino
+
+        cleanedField =
+            projectTetrominoToGrid Empty tetromino playfield
+
+        isPossible =
+            isPossiblePosition updatedTetromino cleanedField
+    in
+    if isPossible then
+        dropTetromino updatedTetromino playfield
+
+    else
+        projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
 
 tryWallKick : T.WallKick -> T.RotateCommand -> Tetromino -> PlayField -> PlayField

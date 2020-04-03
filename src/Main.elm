@@ -9,14 +9,14 @@ module Main exposing (..)
 import Array
 import Browser exposing (Document)
 import Css exposing (..)
-import Html.Styled exposing (Html, button, div, h1, text, toUnstyled)
+import Html.Styled exposing (Html, button, div, header, nav, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
 import Playfield exposing (Cell(..), Grid, PlayField, PlayFieldState(..), Row, retrieveGrid)
 import Random
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
-import Tetris as T exposing (SpawnCommand(..), Tetris(..), scoreToString)
+import Tetris as T exposing (SpawnCommand(..), Tetris(..), levelToString, scoreToString, timeSpentInRow)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
@@ -40,7 +40,7 @@ main =
 
 type Game
     = NotStarted
-    | Started Tetris
+    | Playing Tetris
     | GameOver Tetris
 
 
@@ -59,7 +59,7 @@ init _ =
 
 type Msg
     = KeyDown RawKey
-    | Tick Time.Posix
+    | Tick
     | SpawnTetromino ( Maybe TetrominoShape, List TetrominoShape )
     | StartGame
 
@@ -68,7 +68,7 @@ update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case msg of
         StartGame ->
-            ( Started <| T.startTetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes) )
+            ( Playing <| T.startTetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes) )
 
         _ ->
             case model of
@@ -78,16 +78,16 @@ update msg model =
                 GameOver _ ->
                     ( model, Cmd.none )
 
-                Started tetris ->
+                Playing tetris ->
                     case msg of
                         StartGame ->
-                            ( Started <| T.startTetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes) )
+                            ( Playing <| T.startTetris, Random.generate SpawnTetromino (randomShapeGenerator allShapes) )
 
                         KeyDown rawKey ->
-                            ( Started <| applyKeyPress tetris rawKey, Cmd.none )
+                            ( Playing <| applyKeyPress tetris rawKey, Cmd.none )
 
-                        Tick _ ->
-                            Tuple.mapFirst Started <| applyGameLoop tetris
+                        Tick ->
+                            Tuple.mapFirst Playing <| applyGameLoop tetris
 
                         SpawnTetromino ( Nothing, _ ) ->
                             ( model, Random.generate SpawnTetromino (randomShapeGenerator allShapes) )
@@ -103,7 +103,7 @@ spawnTetromino shape availableShapes tetris =
             ( GameOver updatedTetris, Cmd.none )
 
         ( updatedTetris, Playable ) ->
-            ( Started updatedTetris, Cmd.none )
+            ( Playing updatedTetris, Cmd.none )
 
 
 applyGameLoop : Tetris -> ( Tetris, Cmd Msg )
@@ -148,7 +148,7 @@ keyToTetrisCommand rawKey =
             Just (Rotate RotateRight)
 
         Just Spacebar ->
-            Nothing
+            Just Drop
 
         _ ->
             Nothing
@@ -159,11 +159,16 @@ keyToTetrisCommand rawKey =
 
 
 subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.batch
-        [ Keyboard.downs KeyDown
-        , Time.every 1000 Tick
-        ]
+subscriptions model =
+    case model of
+        Playing tetris ->
+            Sub.batch
+                [ Keyboard.downs KeyDown
+                , Time.every (timeSpentInRow tetris) (\_ -> Tick)
+                ]
+
+        _ ->
+            Sub.none
 
 
 
@@ -194,6 +199,16 @@ cellColor cell =
             hex "ffffff"
 
 
+cellBorder : Cell -> Style
+cellBorder cell =
+    case cell of
+        Moving color ->
+            border3 (px 0.1) solid (hex color)
+
+        _ ->
+            border3 (px 0.1) solid (rgb 0 0 0)
+
+
 buildCell : Cell -> Html Msg
 buildCell cell =
     div
@@ -202,7 +217,7 @@ buildCell cell =
             , width (px 20)
             , height (pct 100)
             , boxSizing borderBox
-            , border3 (px 0.1) solid (rgb 0 0 0)
+            , cellBorder cell
             , backgroundColor (cellColor cell)
             ]
         ]
@@ -219,20 +234,28 @@ buildGame : Model -> Html Msg
 buildGame model =
     case model of
         NotStarted ->
-            div [] [ button [ onClick StartGame ] [ text "start game" ] ]
+            nav [] [ button [ onClick StartGame ] [ text "start game" ] ]
 
         GameOver tetris ->
             div []
-                [ h1 [] [ text ("Game Over with score " ++ scoreToString tetris) ]
-                , T.retrieveField tetris |> retrieveGrid |> buildGrid
-                , button [ onClick StartGame ] [ text "restart game" ]
+                [ header []
+                    [ div [] [ T.retrieveField tetris |> retrieveGrid |> buildGrid ]
+                    , div [] [ text "game over" ]
+                    , div [] [ text ("Level " ++ scoreToString tetris) ]
+                    , div [] [ text ("Score " ++ levelToString tetris) ]
+                    , div [] [ button [ onClick StartGame ] [ text "restart game" ] ]
+                    ]
                 ]
 
-        Started tetris ->
+        Playing tetris ->
             div []
-                [ h1 [] [ text ("Playing with score " ++ scoreToString tetris) ]
-                , T.retrieveField tetris |> retrieveGrid |> buildGrid
-                , button [ onClick StartGame ] [ text "restart game" ]
+                [ header []
+                    [ div [] [ T.retrieveField tetris |> retrieveGrid |> buildGrid ]
+                    , div [] [ text "playing" ]
+                    , div [] [ text ("Level " ++ scoreToString tetris) ]
+                    , div [] [ text ("Score " ++ levelToString tetris) ]
+                    , div [] [ button [ onClick StartGame ] [ text "restart game" ] ]
+                    ]
                 ]
 
 

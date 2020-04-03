@@ -8,7 +8,8 @@ type Tetromino
 
 
 type TetrominoCommand
-    = Move MoveCommand
+    = Drop
+    | Move MoveCommand
     | Rotate RotateCommand
 
 
@@ -50,6 +51,9 @@ applyCommand command =
 
         Rotate RotateRight ->
             rotateTetrominoRight
+
+        Drop ->
+            moveTetrominoDown
 
 
 moveTetrominoDown : Tetromino -> Tetromino

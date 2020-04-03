@@ -2,20 +2,45 @@ module TetrisTests exposing (..)
 
 import Expect
 import Test exposing (Test, describe, test)
-import Tetris exposing (updateScore)
+import Tetris exposing (ScoringSystem(..), addRemovedLinesToScoring, initScoring)
 
 
 suite : Test
 suite =
-    describe "Playfield mechanics"
-        [ test "Spawn piece at the top of the playfield" <|
+    describe "Score and level mechanics"
+        [ test "Increase level" <|
             \_ ->
                 let
                     originalScore =
-                        1000
+                        Scoring 0 1 0
 
-                    inputs =
-                        [ ( 0, 1 ), ( 1, 1 ), ( 2, 1 ), ( 3, 1 ), ( 4, 1 ), ( 4, 2 ) ]
+                    (Scoring _ level _) =
+                        addRemovedLinesToScoring 4 originalScore
                 in
-                Expect.equal [ 1000, 1040, 1100, 1300, 2200, 3400 ] (List.map (\( lines, level ) -> updateScore lines originalScore level) inputs)
+                Expect.equal 2 level
+        , test "Increase scoring system" <|
+            \_ ->
+                let
+                    linesRemoved =
+                        [ 1, 2, 3, 4 ]
+
+                    originalScore : ScoringSystem
+                    originalScore =
+                        initScoring
+
+                    f =
+                        \l ( s, list ) ->
+                            let
+                                score =
+                                    addRemovedLinesToScoring l s
+                            in
+                            ( score, score :: list )
+
+                    scores : List ScoringSystem
+                    scores =
+                        List.foldl f ( originalScore, [] ) linesRemoved
+                            |> Tuple.second
+                            |> List.reverse
+                in
+                Expect.equal [ Scoring 40 1 1, Scoring 140 1 4, Scoring 440 2 9, Scoring 2840 2 17 ] scores
         ]
