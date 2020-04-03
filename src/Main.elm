@@ -9,14 +9,14 @@ module Main exposing (..)
 import Array
 import Browser exposing (Document)
 import Css exposing (..)
-import Html.Styled exposing (Html, button, div, text, toUnstyled)
+import Html.Styled exposing (Html, button, div, h1, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
 import Playfield exposing (Cell(..), Grid, PlayField, PlayFieldState(..), Row, retrieveGrid)
 import Random
 import Shape exposing (Shape, allShapes, randomShapeGenerator)
-import Tetris as T exposing (SpawnCommand(..), Tetris(..))
+import Tetris as T exposing (SpawnCommand(..), Tetris(..), scoreToString)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
@@ -46,6 +46,7 @@ type Game
 
 type alias Model =
     Game
+
 
 init : () -> ( Model, Cmd Msg )
 init _ =
@@ -211,7 +212,8 @@ buildCell cell =
 buildGrid : Grid -> Html Msg
 buildGrid grid =
     div []
-        (List.map buildRow (Array.toList grid))
+        (List.map buildRow (Array.toList grid |> List.drop 2))
+
 
 buildGame : Model -> Html Msg
 buildGame model =
@@ -221,18 +223,21 @@ buildGame model =
 
         GameOver tetris ->
             div []
-                [ T.retrieveField tetris |> retrieveGrid |> buildGrid
+                [ h1 [] [ text ("Game Over with score " ++ scoreToString tetris) ]
+                , T.retrieveField tetris |> retrieveGrid |> buildGrid
                 , button [ onClick StartGame ] [ text "restart game" ]
                 ]
 
         Started tetris ->
             div []
-                [ T.retrieveField tetris |> retrieveGrid |> buildGrid
+                [ h1 [] [ text ("Playing with score " ++ scoreToString tetris) ]
+                , T.retrieveField tetris |> retrieveGrid |> buildGrid
                 , button [ onClick StartGame ] [ text "restart game" ]
                 ]
+
 
 view : Model -> Document Msg
 view model =
     { title = "Tetris Kata in Elm"
     , body = List.singleton (buildGame model |> toUnstyled)
-  }
+    }
