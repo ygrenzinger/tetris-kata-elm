@@ -1,15 +1,20 @@
 module Tetromino exposing (..)
 
-import Shape exposing (Shape, cellPositions, rotateClockWise, rotateCounterClockWise, shapeSize)
+import Shape as S exposing (Shape, ShapeColor, TetrominoShape)
 
 
 type Tetromino
-    = Tetromino Shape ( Int, Int )
+    = Tetromino TetrominoShape ( Int, Int )
 
 
 type TetrominoCommand
     = Move MoveCommand
     | Rotate RotateCommand
+
+
+getColor : Tetromino -> ShapeColor
+getColor (Tetromino shape _) =
+    S.getColor shape
 
 
 type MoveCommand
@@ -64,17 +69,17 @@ moveTetrominoRight (Tetromino shape ( i, j )) =
 
 rotateTetrominoRight : Tetromino -> Tetromino
 rotateTetrominoRight (Tetromino shape ( i, j )) =
-    Tetromino (rotateClockWise shape) ( i, j )
+    Tetromino (S.rotateClockWise shape) ( i, j )
 
 
 rotateTetrominoLeft : Tetromino -> Tetromino
 rotateTetrominoLeft (Tetromino shape ( i, j )) =
-    Tetromino (rotateCounterClockWise shape) ( i, j )
+    Tetromino (S.rotateCounterClockWise shape) ( i, j )
 
 
 positions : Tetromino -> List ( Int, Int )
 positions (Tetromino shape ( i, j )) =
-    List.map (\( ii, jj ) -> ( ii + i, jj + j )) (cellPositions shape)
+    List.map (\( ii, jj ) -> ( ii + i, jj + j )) (S.cellPositions shape)
 
 
 whichWallKickToAttempt : Tetromino -> Maybe WallKick
@@ -82,8 +87,8 @@ whichWallKickToAttempt (Tetromino shape ( _, j )) =
     if j < 0 then
         Just (LeftWallKick (negate j))
 
-    else if (j + shapeSize shape) >= 9 then
-        Just (RightWallKick (j + shapeSize shape - 10))
+    else if (j + S.shapeSize shape) >= 9 then
+        Just (RightWallKick (j + S.shapeSize shape - 10))
 
     else
         Nothing

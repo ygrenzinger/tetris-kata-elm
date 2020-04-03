@@ -4,7 +4,7 @@ import Expect
 import Fuzz exposing (list)
 import Fuzzing exposing (fuzzMoveCommand, fuzzShape)
 import Playfield exposing (..)
-import Shape exposing (Shape, shapeI, shapeO)
+import Shape exposing (Shape, TetrominoShape, shapeI, shapeO)
 import Test exposing (..)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), Tetromino(..), TetrominoCommand(..))
 
@@ -21,10 +21,10 @@ updateGrid cell positions grid =
 
 countMovingCell : ( Int, Int ) -> ( Int, Int ) -> PlayField -> Int
 countMovingCell rowRange columnRange =
-    countCellAtState Moving (buildPositions rowRange columnRange)
+    countCellAtState isMovingCell (buildPositions rowRange columnRange)
 
 
-createPlayFieldWithShape : Shape -> PlayField
+createPlayFieldWithShape : TetrominoShape -> PlayField
 createPlayFieldWithShape shape =
     createPlayfield |> spawnTetromino shape |> Tuple.first
 
@@ -46,7 +46,7 @@ suite =
             \shape ->
                 let
                     nbMovingBlocks =
-                        countCellAtState Moving (buildPositions ( 0, 1 ) ( 3, 7 )) (createPlayFieldWithShape shape)
+                        countCellAtState isMovingCell (buildPositions ( 0, 1 ) ( 3, 7 )) (createPlayFieldWithShape shape)
                 in
                 Expect.equal 4 nbMovingBlocks
         , test "Moving tetromino at the far left" <|
@@ -122,7 +122,7 @@ suite =
                 let
                     grid =
                         createGrid
-                            |> updateGrid Fixed (buildPositions ( 20, 21 ) ( 0, 9 ))
+                            |> updateGrid (Fixed "000000") (buildPositions ( 20, 21 ) ( 0, 9 ))
 
                     ( originalField, _ ) =
                         PlayField Nothing grid |> spawnTetromino shapeO
@@ -141,7 +141,7 @@ suite =
                         makeTetrominoFallDownUntilBlocked ( originalField, Nothing )
 
                     nbTotalFixedBlocks =
-                        Tuple.first result |> countCellAtState Fixed (buildPositions ( 0, 21 ) ( 0, 9 ))
+                        Tuple.first result |> countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 ))
                 in
                 Expect.equal ( 4, Just 0 ) ( nbTotalFixedBlocks, Tuple.second result )
         , test "make a tetromino fall until blocked, remove full lines and count them" <|
@@ -149,7 +149,7 @@ suite =
                 let
                     grid =
                         createGrid
-                            |> updateGrid Fixed (buildPositions ( 19, 21 ) ( 0, 9 ))
+                            |> updateGrid (Fixed "000000") (buildPositions ( 19, 21 ) ( 0, 9 ))
                             |> updateGrid Empty (buildPositions ( 19, 21 ) ( 4, 5 ))
 
                     ( originalField, _ ) =
@@ -159,10 +159,10 @@ suite =
                         makeTetrominoFallDownUntilBlocked ( originalField, Nothing )
 
                     nbTotalFixedBlocks =
-                        countCellAtState Fixed (buildPositions ( 0, 21 ) ( 0, 9 )) field
+                        countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 )) field
 
                     nbBottomLinesFixedBlocks =
-                        countCellAtState Fixed (buildPositions ( 21, 21 ) ( 0, 9 )) field
+                        countCellAtState isFixedCell (buildPositions ( 21, 21 ) ( 0, 9 )) field
                 in
                 Expect.equal ( 8, 8, Just 2 ) ( nbTotalFixedBlocks, nbBottomLinesFixedBlocks, removedLines )
         ]

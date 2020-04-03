@@ -4,8 +4,14 @@ import Random
 import Random.List
 
 
-
--- type ShapeName = I | J | L | O | S | Z | T
+type ShapeName
+    = I
+    | J
+    | L
+    | O
+    | S
+    | Z
+    | T
 
 
 type ShapeCell
@@ -17,6 +23,19 @@ type alias Shape =
     List (List ShapeCell)
 
 
+type alias ShapeColor =
+    String
+
+
+type TetrominoShape
+    = TetrominoShape ShapeName ShapeColor Shape
+
+
+getColor : TetrominoShape -> ShapeColor
+getColor (TetrominoShape _ color _) =
+    color
+
+
 isFull : ShapeCell -> Bool
 isFull cell =
     if cell == Full then
@@ -26,13 +45,13 @@ isFull cell =
         False
 
 
-shapeSize : Shape -> Int
-shapeSize =
-    List.length
+shapeSize : TetrominoShape -> Int
+shapeSize (TetrominoShape _ _ shape) =
+    List.length shape
 
 
-cellPositions : Shape -> List ( Int, Int )
-cellPositions shape =
+cellPositions : TetrominoShape -> List ( Int, Int )
+cellPositions (TetrominoShape _ _ shape) =
     let
         cells =
             List.indexedMap (\i row -> List.indexedMap (\j cell -> ( i, j, cell )) row) shape |> List.concat
@@ -43,8 +62,13 @@ cellPositions shape =
     cells |> List.filter isFullPos |> List.map (\( i, j, _ ) -> ( i, j ))
 
 
-rotateClockWise : Shape -> Shape
-rotateClockWise shape =
+rotateClockWise : TetrominoShape -> TetrominoShape
+rotateClockWise (TetrominoShape name color shape) =
+    TetrominoShape name color (rotateShapeClockWise shape)
+
+
+rotateShapeClockWise : Shape -> Shape
+rotateShapeClockWise shape =
     let
         heads =
             List.map (List.take 1) shape |> List.concat |> List.reverse
@@ -56,16 +80,21 @@ rotateClockWise shape =
         []
 
     else
-        heads :: rotateClockWise tails
+        heads :: rotateShapeClockWise tails
 
 
-rotateCounterClockWise : Shape -> Shape
-rotateCounterClockWise shape =
-    List.reverse (innerRotateCounterClockWise shape)
+rotateCounterClockWise : TetrominoShape -> TetrominoShape
+rotateCounterClockWise (TetrominoShape name color shape) =
+    TetrominoShape name color (rotateShapeCounterClockWise shape)
 
 
-innerRotateCounterClockWise : Shape -> Shape
-innerRotateCounterClockWise shape =
+rotateShapeCounterClockWise : Shape -> Shape
+rotateShapeCounterClockWise shape =
+    List.reverse (innerShapeRotateCounterClockWise shape)
+
+
+innerShapeRotateCounterClockWise : Shape -> Shape
+innerShapeRotateCounterClockWise shape =
     let
         heads =
             List.map (List.take 1) shape |> List.concat
@@ -77,7 +106,7 @@ innerRotateCounterClockWise shape =
         []
 
     else
-        heads :: innerRotateCounterClockWise tails
+        heads :: innerShapeRotateCounterClockWise tails
 
 
 fromChar : Char -> ShapeCell
@@ -94,76 +123,83 @@ fromStringRepresentation lines =
     List.map (String.toList >> List.map fromChar) lines
 
 
-shapeI : Shape
+shapeI : TetrominoShape
 shapeI =
-    fromStringRepresentation
-        [ "    "
-        , "XXXX"
-        , "    "
-        , "    "
-        ]
+    TetrominoShape I "00FFFF" <|
+        fromStringRepresentation
+            [ "    "
+            , "XXXX"
+            , "    "
+            , "    "
+            ]
 
 
-shapeJ : Shape
+shapeJ : TetrominoShape
 shapeJ =
-    fromStringRepresentation
-        [ "X  "
-        , "XXX"
-        , "   "
-        ]
+    TetrominoShape J "00008B" <|
+        fromStringRepresentation
+            [ "X  "
+            , "XXX"
+            , "   "
+            ]
 
 
-shapeL : Shape
+shapeL : TetrominoShape
 shapeL =
-    fromStringRepresentation
-        [ "  X"
-        , "XXX"
-        , "   "
-        ]
+    TetrominoShape L "FF8C00" <|
+        fromStringRepresentation
+            [ "  X"
+            , "XXX"
+            , "   "
+            ]
 
 
-shapeO : Shape
+shapeO : TetrominoShape
 shapeO =
-    fromStringRepresentation
-        [ " XX "
-        , " XX "
-        , "    "
-        , "    "
-        ]
+    TetrominoShape O "FFD700" <|
+        fromStringRepresentation
+            [ " XX "
+            , " XX "
+            , "    "
+            , "    "
+            ]
 
 
-shapeS : Shape
+shapeS : TetrominoShape
 shapeS =
-    fromStringRepresentation
-        [ " XX"
-        , "XX "
-        , "   "
-        ]
+    TetrominoShape S "008000" <|
+        fromStringRepresentation
+            [ " XX"
+            , "XX "
+            , "   "
+            ]
 
 
-shapeZ : Shape
+shapeZ : TetrominoShape
 shapeZ =
-    fromStringRepresentation
-        [ "XX "
-        , " XX"
-        , "   "
-        ]
+    TetrominoShape Z "FF0000" <|
+        fromStringRepresentation
+            [ "XX "
+            , " XX"
+            , "   "
+            ]
 
 
-shapeT : Shape
+shapeT : TetrominoShape
 shapeT =
-    fromStringRepresentation
-        [ " X "
-        , "XXX"
-        , "   "
-        ]
+    TetrominoShape T "800080" <|
+        fromStringRepresentation
+            [ " X "
+            , "XXX"
+            , "   "
+            ]
 
 
-allShapes : List Shape
+allShapes : List TetrominoShape
 allShapes =
     [ shapeI, shapeJ, shapeL, shapeO, shapeS, shapeZ, shapeT ]
 
 
-randomShapeGenerator : List Shape -> Random.Generator ( Maybe Shape, List Shape )
+randomShapeGenerator : List TetrominoShape -> Random.Generator ( Maybe TetrominoShape, List TetrominoShape )
 randomShapeGenerator possibleShapes =
     Random.List.choose possibleShapes

@@ -15,7 +15,7 @@ import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
 import Playfield exposing (Cell(..), Grid, PlayField, PlayFieldState(..), Row, retrieveGrid)
 import Random
-import Shape exposing (Shape, allShapes, randomShapeGenerator)
+import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
 import Tetris as T exposing (SpawnCommand(..), Tetris(..), scoreToString)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
@@ -60,7 +60,7 @@ init _ =
 type Msg
     = KeyDown RawKey
     | Tick Time.Posix
-    | SpawnTetromino ( Maybe Shape, List Shape )
+    | SpawnTetromino ( Maybe TetrominoShape, List TetrominoShape )
     | StartGame
 
 
@@ -96,7 +96,7 @@ update msg model =
                             spawnTetromino shape availableShapes tetris
 
 
-spawnTetromino : Shape -> List Shape -> Tetris -> ( Model, Cmd Msg )
+spawnTetromino : TetrominoShape -> List TetrominoShape -> Tetris -> ( Model, Cmd Msg )
 spawnTetromino shape availableShapes tetris =
     case T.spawnTetromino shape availableShapes tetris of
         ( updatedTetris, Full ) ->
@@ -184,14 +184,14 @@ buildRow row =
 cellColor : Cell -> Color
 cellColor cell =
     case cell of
-        Moving ->
-            rgb 150 150 150
+        Moving color ->
+            hex color
 
-        Fixed ->
-            rgb 0 0 0
+        Fixed color ->
+            hex color
 
         Empty ->
-            rgb 255 255 255
+            hex "ffffff"
 
 
 buildCell : Cell -> Html Msg

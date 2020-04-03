@@ -1,14 +1,14 @@
 module Playfield exposing (..)
 
 import Array exposing (Array, repeat)
-import Shape exposing (Shape, shapeSize)
+import Shape exposing (Shape, ShapeColor, TetrominoShape, shapeSize)
 import Tetromino as T exposing (MoveCommand(..), Tetromino(..), TetrominoCommand(..))
 
 
 type Cell
     = Empty
-    | Moving
-    | Fixed
+    | Moving ShapeColor
+    | Fixed ShapeColor
 
 
 type alias Row =
@@ -38,16 +38,46 @@ updateRow =
     Array.set
 
 
-isRowFullOf : Cell -> Row -> Bool
-isRowFullOf cell =
-    List.all (\c -> c == cell) << Array.toList
+isFixedCell : Cell -> Bool
+isFixedCell cell =
+    case cell of
+        Fixed _ ->
+            True
+
+        _ ->
+            False
 
 
-countCellAtState : Cell -> List ( Int, Int ) -> PlayField -> Int
-countCellAtState state positions (PlayField _ grid) =
+isEmptyCell : Cell -> Bool
+isEmptyCell cell =
+    case cell of
+        Empty ->
+            True
+
+        _ ->
+            False
+
+
+isMovingCell : Cell -> Bool
+isMovingCell cell =
+    case cell of
+        Moving _ ->
+            True
+
+        _ ->
+            False
+
+
+isRowFull : Row -> Bool
+isRowFull =
+    List.all isFixedCell << Array.toList
+
+
+countCellAtState : (Cell -> Bool) -> List ( Int, Int ) -> PlayField -> Int
+countCellAtState fn positions (PlayField _ grid) =
     List.map
         (\pos ->
-            if getCellState grid pos == Just state then
+            if getCellState grid pos |> Maybe.map fn |> Maybe.withDefault False then
                 1
 
             else
@@ -88,10 +118,10 @@ retrieveGrid (PlayField _ grid) =
 
 isPossiblePosition : Tetromino -> PlayField -> Bool
 isPossiblePosition tetromino grid =
-    countCellAtState Empty (T.positions tetromino) grid == 4
+    countCellAtState isEmptyCell (T.positions tetromino) grid == 4
 
 
-spawnTetromino : Shape -> PlayField -> ( PlayField, PlayFieldState )
+spawnTetromino : TetrominoShape -> PlayField -> ( PlayField, PlayFieldState )
 spawnTetromino shape field =
     let
         columnPos =
@@ -105,10 +135,10 @@ spawnTetromino shape field =
             Tetromino shape ( 0, columnPos )
     in
     if isPossiblePosition tetromino field then
-        ( projectTetrominoToGrid Moving tetromino field, Playable )
+        ( projectTetrominoToGrid (Moving (T.getColor tetromino)) tetromino field, Playable )
 
     else
-        ( projectTetrominoToGrid Fixed tetromino field, Full )
+        ( projectTetrominoToGrid (Fixed (T.getColor tetromino)) tetromino field, Full )
 
 
 projectTetrominoToGrid : Cell -> Tetromino -> PlayField -> PlayField
@@ -119,7 +149,7 @@ projectTetrominoToGrid cell tetromino (PlayField _ grid) =
 applyCommand : TetrominoCommand -> PlayField -> PlayField
 applyCommand command playfield =
     case playfield of
-        PlayField (Just tetromino) grid ->
+        PlayField (Just tetromino) _ ->
             applyCommandOnTetromino command tetromino playfield
 
         (PlayField Nothing _) as p ->
@@ -140,7 +170,7 @@ applyCommandOnTetromino command tetromino playfield =
     in
     case ( command, isPossible ) of
         ( T.Rotate _, True ) ->
-            projectTetrominoToGrid Moving updatedTetromino cleanedField
+            projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
         ( T.Rotate (_ as rotateCommand), False ) ->
             case T.whichWallKickToAttempt tetromino of
@@ -151,7 +181,7 @@ applyCommandOnTetromino command tetromino playfield =
                     tryWallKick wallKick rotateCommand tetromino playfield
 
         ( _, True ) ->
-            projectTetrominoToGrid Moving updatedTetromino cleanedField
+            projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
         ( _, False ) ->
             playfield
@@ -186,7 +216,7 @@ tryWallKick wallKick command tetromino playfield =
             isPossiblePosition updatedTetromino cleanedField
     in
     if isPossible then
-        projectTetrominoToGrid Moving updatedTetromino cleanedField
+        projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
     else
         playfield
@@ -209,7 +239,7 @@ tetrominoFallDown tetromino playfield =
             applyCommand (Move MoveDown) playfield
     in
     if Maybe.map (T.samePosition tetromino) updatedTetromino |> Maybe.withDefault False then
-        projectTetrominoToGrid Fixed tetromino playfield
+        projectTetrominoToGrid (Fixed (T.getColor tetromino)) tetromino playfield
             |> cleanFullLinesAndRemoveTetromino
             |> Tuple.mapSecond Just
 
@@ -236,7 +266,7 @@ removeFullRows : List Row -> List Row -> Int -> ( List Row, Int )
 removeFullRows previous new numberOfRemovedLines =
     let
         cleanRow head rest =
-            if isRowFullOf Fixed head then
+            if isRowFull head then
                 removeFullRows rest new (numberOfRemovedLines + 1)
 
             else

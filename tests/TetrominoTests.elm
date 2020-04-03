@@ -2,7 +2,7 @@ module TetrominoTests exposing (..)
 
 import Expect
 import Fuzzing exposing (fuzzShape)
-import Shape exposing (cellPositions, fromStringRepresentation, rotateClockWise, rotateCounterClockWise, shapeI, shapeL, shapeT)
+import Shape exposing (TetrominoShape(..), cellPositions, fromStringRepresentation, rotateClockWise, rotateCounterClockWise, shapeI, shapeL, shapeT)
 import Test exposing (..)
 import Tetromino exposing (Tetromino(..), WallKick(..), moveTetrominoLeft, moveTetrominoRight, rotateTetrominoLeft, rotateTetrominoRight, samePosition, whichWallKickToAttempt)
 
@@ -15,14 +15,17 @@ suite =
         , test "rotating shape 90° clockwise" <|
             \_ ->
                 let
-                    rotatedShape =
+                    exepectedShape =
                         fromStringRepresentation
                             [ " X "
                             , " X "
                             , " XX"
                             ]
+
+                    (TetrominoShape _ _ rotatedShape) =
+                        rotateClockWise shapeL
                 in
-                Expect.equal rotatedShape (rotateClockWise shapeL)
+                Expect.equal exepectedShape rotatedShape
         , fuzz fuzzShape "rotating shape 90° clockwise then counterclockwise" <|
             \shape -> Expect.equal shape ((rotateClockWise >> rotateCounterClockWise) shape)
         , fuzz fuzzShape "rotating shape 90° clockwise four times" <|
