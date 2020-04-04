@@ -69,7 +69,7 @@ suite =
             \commands ->
                 let
                     field =
-                        List.foldl applyCommand (createPlayFieldWithShape shapeO) commands
+                        List.foldl applyCommand (createPlayFieldWithShape shapeO) (commands |> List.map Move)
                 in
                 Expect.equal 4 (countMovingCell ( 0, 21 ) ( 0, 9 ) field)
         , test "Rotating tetromino on the left" <|

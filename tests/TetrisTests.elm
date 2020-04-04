@@ -1,8 +1,13 @@
 module TetrisTests exposing (..)
 
+import Array
 import Expect
-import Test exposing (Test, describe, test)
-import Tetris exposing (ScoringSystem(..), addRemovedLinesToScoring, initScoring)
+import Fuzz exposing (list)
+import Fuzzing exposing (fuzzTetrisAction)
+import Playfield exposing (PlayFieldState(..), isRowFull, retrieveGrid)
+import Shape exposing (shapeO)
+import Test exposing (Test, describe, fuzz, fuzzWith, test)
+import Tetris exposing (ScoringSystem(..), Tetris, addRemovedLinesToScoring, initScoring, retrieveField, retrieveScore, spawnTetromino, startTetris)
 
 
 suite : Test
@@ -43,4 +48,21 @@ suite =
                             |> List.reverse
                 in
                 Expect.equal [ Scoring 40 1 1, Scoring 140 1 4, Scoring 440 2 9, Scoring 2840 2 17 ] scores
+        , fuzzWith { runs = 2000 } (list fuzzTetrisAction) "At any moment of a Tetris game, there should be no full row" <|
+            -- Clearly not the best property based test out there but trying :)
+            \actions ->
+                let
+                    init : Tetris
+                    init =
+                        startTetris |> spawnTetromino shapeO [] |> Tuple.first
+
+                    tetris : Tetris
+                    tetris =
+                        List.foldl (\f t -> f t) init actions
+
+                    hasNoFullRow : Tetris -> Bool
+                    hasNoFullRow =
+                        \t -> not <| List.any isRowFull (retrieveField t |> retrieveGrid |> Array.toList)
+                in
+                Expect.true "Should have no full row" (hasNoFullRow tetris)
         ]

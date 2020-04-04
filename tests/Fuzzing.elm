@@ -1,9 +1,11 @@
 module Fuzzing exposing (..)
 
 import Array
-import Fuzz exposing (Fuzzer, int, intRange, map)
-import Shape exposing (Shape, TetrominoShape, allShapes, shapeI)
-import Tetromino exposing (MoveCommand(..), TetrominoCommand(..))
+import Fuzz exposing (Fuzzer, constant, frequency, int, intRange, list, map)
+import Random.Extra as Random
+import Shape exposing (Shape, TetrominoShape, allShapes, shapeI, shapeO)
+import Tetris exposing (Tetris, applyTetrominoCommand, makePieceFallDown, spawnTetromino)
+import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 
 
 retrieveShape : Int -> TetrominoShape
@@ -20,19 +22,37 @@ fuzzShape =
     int |> map retrieveShape
 
 
-chooseCommand : Int -> TetrominoCommand
-chooseCommand i =
+chooseMoveCommand : Int -> MoveCommand
+chooseMoveCommand i =
     case i of
         0 ->
-            Move MoveLeft
+            MoveLeft
 
         1 ->
-            Move MoveRight
+            MoveRight
 
         _ ->
-            Move MoveDown
+            MoveDown
 
 
-fuzzMoveCommand : Fuzzer TetrominoCommand
+fuzzMoveCommand : Fuzzer MoveCommand
 fuzzMoveCommand =
-    intRange 0 2 |> map chooseCommand
+    intRange 0 2 |> map chooseMoveCommand
+
+
+fuzzTetrominoCommand : Fuzzer TetrominoCommand
+fuzzTetrominoCommand =
+    frequency
+        [ ( 5, constant (Move MoveRight) )
+        , ( 4, constant (Move MoveLeft) )
+        , ( 2, constant (Rotate RotateRight) )
+        , ( 2, constant (Rotate RotateLeft) )
+        ]
+
+
+fuzzTetrisAction : Fuzzer (Tetris -> Tetris)
+fuzzTetrisAction =
+    frequency
+        [ ( 9, fuzzTetrominoCommand |> map applyTetrominoCommand )
+        , ( 1, fuzzShape |> map (\s -> Tuple.first << spawnTetromino s [] << Tuple.first << makePieceFallDown << applyTetrominoCommand Drop) )
+        ]
