@@ -9,14 +9,14 @@ module Main exposing (..)
 import Array
 import Browser exposing (Document)
 import Css exposing (..)
-import Html.Styled exposing (Html, button, div, header, nav, text, toUnstyled)
+import Html.Styled exposing (Attribute, Html, button, div, header, nav, span, styled, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
 import Playfield exposing (Cell(..), Grid, PlayField, PlayFieldState(..), Row, retrieveGrid)
 import Random
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
-import Tetris as T exposing (SpawnCommand(..), Tetris(..), levelToString, scoreToString, timeSpentInRow)
+import Tetris as T exposing (ScoringSystem, SpawnCommand(..), Tetris(..), levelToString, retrieveScore, scoreToString, timeSpentInRow)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
@@ -183,7 +183,7 @@ buildRow row =
             , margin (px 0)
             ]
         ]
-        (List.map buildCell (Array.toList row))
+        (List.map displayCell (Array.toList row))
 
 
 cellColor : Cell -> Color
@@ -209,8 +209,8 @@ cellBorder cell =
             border3 (px 0.1) solid (rgb 0 0 0)
 
 
-buildCell : Cell -> Html Msg
-buildCell cell =
+displayCell : Cell -> Html Msg
+displayCell cell =
     div
         [ css
             [ display inlineBlock
@@ -224,43 +224,120 @@ buildCell cell =
         []
 
 
-buildGrid : Grid -> Html Msg
-buildGrid grid =
-    div []
+displayGrid : Grid -> Html Msg
+displayGrid grid =
+    div
+        [ css
+            [ boxShadow5 (px 3) (px 4) (px 0) (px 0) (hex "899599")
+            , backgroundColor (hex "ededed")
+            , border3 (px 1) solid (hex "d6bcd6")
+            ]
+        ]
         (List.map buildRow (Array.toList grid |> List.drop 2))
+
+
+displayScore : ScoringSystem -> Html Msg
+displayScore scoring =
+    div []
+        [ div
+            [ css
+                [ padding2 (px 10) (px 0)
+                ]
+            ]
+            [ text ("Level " ++ levelToString scoring) ]
+        , div
+            [ css
+                [ padding2 (px 5) (px 0)
+                ]
+            ]
+            [ text ("Score " ++ scoreToString scoring) ]
+        ]
+
+
+buildTetris : String -> Tetris -> Html Msg
+buildTetris title tetris =
+    div
+        [ css
+            [ width (px 500)
+            , displayFlex
+            , justifyContent spaceAround
+            ]
+        ]
+        [ div
+            []
+            [ T.retrieveField tetris |> retrieveGrid |> displayGrid ]
+        , div
+            [ css
+                [ textAlign center
+                ]
+            ]
+            [ div
+                [ css
+                    [ fontSize (px 20)
+                    , fontWeight bold
+                    , padding2 (px 5) (px 0)
+                    ]
+                ]
+                [ text title ]
+            , div [] [ displayScore (retrieveScore tetris) ]
+            , btn [ onClick StartGame ] [ text "restart game" ]
+            ]
+        ]
 
 
 buildGame : Model -> Html Msg
 buildGame model =
     case model of
         NotStarted ->
-            nav [] [ button [ onClick StartGame ] [ text "start game" ] ]
+            btn [ onClick StartGame ] [ text "start game" ]
 
         GameOver tetris ->
-            div []
-                [ header []
-                    [ div [] [ T.retrieveField tetris |> retrieveGrid |> buildGrid ]
-                    , div [] [ text "game over" ]
-                    , div [] [ text ("Level " ++ scoreToString tetris) ]
-                    , div [] [ text ("Score " ++ levelToString tetris) ]
-                    , div [] [ button [ onClick StartGame ] [ text "restart game" ] ]
-                    ]
-                ]
+            buildTetris "Game Over" tetris
 
         Playing tetris ->
-            div []
-                [ header []
-                    [ div [] [ T.retrieveField tetris |> retrieveGrid |> buildGrid ]
-                    , div [] [ text "playing" ]
-                    , div [] [ text ("Level " ++ scoreToString tetris) ]
-                    , div [] [ text ("Score " ++ levelToString tetris) ]
-                    , div [] [ button [ onClick StartGame ] [ text "restart game" ] ]
-                    ]
-                ]
+            buildTetris "Running" tetris
+
+
+buildPage : Model -> Html Msg
+buildPage model =
+    div
+        [ css
+            [ paddingTop (px 10)
+            , displayFlex
+            , justifyContent center
+            , alignItems center
+            ]
+        ]
+        [ buildGame model
+        ]
 
 
 view : Model -> Document Msg
 view model =
     { title = "Tetris Kata in Elm"
-    , body = List.singleton (buildGame model |> toUnstyled)
+    , body = List.singleton (buildPage model |> toUnstyled)
     }
+
+
+btn : List (Attribute msg) -> List (Html msg) -> Html msg
+btn =
+    styled button
+        [ display inlineBlock
+        , color (hex "ffffff")
+        , backgroundColor (hex "44c767")
+        , padding2 (px 15) (px 30)
+        , border3 (px 1) solid (hex "18ab29")
+        , borderRadius (px 28)
+        , cursor pointer
+        , fontFamilies [ "Arial" ]
+        , fontSize (px 16)
+        , textDecoration none
+        , textShadow4 (px 0) (px 1) (px 0) (hex "2f6627")
+        , hover
+            [ backgroundColor (hex "5cbf2a")
+            ]
+        , active
+            [ position relative
+            , top (px 1)
+            ]
+        ]

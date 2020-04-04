@@ -50,13 +50,13 @@ initScoring =
     Scoring 0 1 0
 
 
-scoreToString : Tetris -> String
-scoreToString (Tetris _ _ (Scoring score _ _)) =
+scoreToString : ScoringSystem -> String
+scoreToString (Scoring score _ _) =
     toString score
 
 
-levelToString : Tetris -> String
-levelToString (Tetris _ _ (Scoring _ level _)) =
+levelToString : ScoringSystem -> String
+levelToString (Scoring _ level _) =
     toString level
 
 
@@ -106,6 +106,11 @@ addRemovedLinesToScoring numberOfRemovedLines (Scoring score level counter) =
             floor (toFloat updatedCounter / (5 * toFloat level)) + 1
     in
     Scoring updatedScore updatedLevel updatedCounter
+
+
+retrieveScore : Tetris -> ScoringSystem
+retrieveScore (Tetris _ _ scoring) =
+    scoring
 
 
 timeSpentInRow : Tetris -> Float
