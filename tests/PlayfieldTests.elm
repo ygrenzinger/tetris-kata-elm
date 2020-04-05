@@ -3,6 +3,7 @@ module PlayfieldTests exposing (..)
 import Expect
 import Fuzz exposing (list)
 import Fuzzing exposing (fuzzMoveCommand, fuzzShape)
+import Grid exposing (Cell(..), Grid, countCellAtState, isFixedCell, isMovingCell, setCellState)
 import Playfield exposing (..)
 import Shape exposing (Shape, TetrominoShape, shapeI, shapeO)
 import Test exposing (..)
@@ -21,7 +22,7 @@ updateGrid cell positions grid =
 
 countMovingCell : ( Int, Int ) -> ( Int, Int ) -> PlayField -> Int
 countMovingCell rowRange columnRange =
-    countCellAtState isMovingCell (buildPositions rowRange columnRange)
+    countCellAtState isMovingCell (buildPositions rowRange columnRange) << retrieveGrid
 
 
 createPlayFieldWithShape : TetrominoShape -> PlayField
@@ -41,7 +42,7 @@ suite =
             \shape ->
                 let
                     nbMovingBlocks =
-                        countCellAtState isMovingCell (buildPositions ( 0, 1 ) ( 3, 7 )) (createPlayFieldWithShape shape)
+                        countCellAtState isMovingCell (buildPositions ( 0, 1 ) ( 3, 7 )) (createPlayFieldWithShape shape |> retrieveGrid)
                 in
                 Expect.equal 4 nbMovingBlocks
         , test "Moving tetromino at the far left" <|
@@ -136,7 +137,7 @@ suite =
                         makeTetrominoFallDownUntilBlocked originalField
 
                     nbTotalFixedBlocks =
-                        Tuple.first result |> countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 ))
+                        Tuple.first result |> retrieveGrid |> countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 ))
                 in
                 Expect.equal ( 4, Just 0 ) ( nbTotalFixedBlocks, Tuple.second result )
         , test "make a tetromino fall until blocked, remove full lines and count them" <|
@@ -154,10 +155,10 @@ suite =
                         makeTetrominoFallDownUntilBlocked originalField
 
                     nbTotalFixedBlocks =
-                        countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 )) field
+                        countCellAtState isFixedCell (buildPositions ( 0, 21 ) ( 0, 9 )) (retrieveGrid field)
 
                     nbBottomLinesFixedBlocks =
-                        countCellAtState isFixedCell (buildPositions ( 21, 21 ) ( 0, 9 )) field
+                        countCellAtState isFixedCell (buildPositions ( 21, 21 ) ( 0, 9 )) (retrieveGrid field)
                 in
                 Expect.equal ( 8, 8, Just 2 ) ( nbTotalFixedBlocks, nbBottomLinesFixedBlocks, removedLines )
         ]

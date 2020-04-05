@@ -4,10 +4,11 @@ import Array
 import Expect
 import Fuzz exposing (list)
 import Fuzzing exposing (fuzzTetrisAction)
-import Playfield exposing (PlayFieldState(..), isRowFull, retrieveGrid)
+import Grid exposing (isRowFull)
+import Playfield exposing (PlayFieldState(..), retrieveGrid)
 import Shape exposing (shapeO)
-import Test exposing (Test, describe, fuzz, fuzzWith, test)
-import Tetris exposing (ScoringSystem(..), Tetris, addRemovedLinesToScoring, initScoring, retrieveField, retrieveScore, spawnTetromino, startTetris)
+import Test exposing (Test, describe, fuzzWith, test)
+import Tetris exposing (ScoringSystem(..), Tetris, addRemovedLinesToScoring, initScoring, retrieveField, spawnTetromino, startTetris)
 
 
 suite : Test
@@ -48,7 +49,7 @@ suite =
                             |> List.reverse
                 in
                 Expect.equal [ Scoring 40 1 1, Scoring 140 1 4, Scoring 440 2 9, Scoring 2840 2 17 ] scores
-        , fuzzWith { runs = 2000 } (list fuzzTetrisAction) "At any moment of a Tetris game, there should be no full row" <|
+        , fuzzWith { runs = 1 } (list fuzzTetrisAction) "At any moment of a Tetris game, there should be no full row" <|
             -- Clearly not the best property based test out there but trying :)
             \actions ->
                 let
