@@ -56,13 +56,13 @@ spawnTetromino shape field =
 
 
 applyCommand : TetrominoCommand -> Playfield -> Playfield
-applyCommand command playfield =
-    case playfield of
+applyCommand command field =
+    case field of
         Playfield (Just tetromino) _ ->
-            applyCommandOnTetromino command tetromino playfield
+            applyCommandOnTetromino command tetromino field
 
-        (Playfield Nothing _) as p ->
-            p
+        Playfield Nothing _ ->
+            field
 
 
 applyCommandOnTetromino : TetrominoCommand -> Tetromino -> Playfield -> Playfield

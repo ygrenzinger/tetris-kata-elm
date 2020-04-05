@@ -15,8 +15,11 @@ type alias Counter =
     Int
 
 
-type ScoringSystem
-    = ScoringSystem Score Level Counter
+type alias ScoringSystem =
+    { score : Int
+    , level : Int
+    , counter : Int
+    }
 
 
 initScoring : ScoringSystem
@@ -25,17 +28,17 @@ initScoring =
 
 
 scoreToString : ScoringSystem -> String
-scoreToString (ScoringSystem score _ _) =
+scoreToString { score } =
     fromInt score
 
 
 levelToString : ScoringSystem -> String
-levelToString (ScoringSystem _ level _) =
+levelToString { level } =
     fromInt level
 
 
 addRemovedLinesToScoring : Int -> ScoringSystem -> ScoringSystem
-addRemovedLinesToScoring numberOfRemovedLines (ScoringSystem score level counter) =
+addRemovedLinesToScoring numberOfRemovedLines { score, level, counter } =
     let
         updatedCounter =
             counter

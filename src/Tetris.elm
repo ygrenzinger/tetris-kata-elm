@@ -1,7 +1,7 @@
 module Tetris exposing (..)
 
 import Playfield as P exposing (Playfield, PlayfieldState(..))
-import ScoringSystem exposing (ScoringSystem(..), addRemovedLinesToScoring, initScoring)
+import ScoringSystem exposing (ScoringSystem, addRemovedLinesToScoring, initScoring)
 import Shape exposing (Shape, TetrominoShape, allShapes)
 import Tetromino exposing (TetrominoCommand(..))
 
@@ -35,7 +35,7 @@ retrieveScore (Tetris _ _ scoring) =
 
 
 timeSpentInRow : Tetris -> Float
-timeSpentInRow (Tetris _ _ (ScoringSystem _ level _)) =
+timeSpentInRow (Tetris _ _ { level }) =
     (0.8 - ((toFloat level - 1) * 0.007)) ^ (toFloat level - 1) * 1000
 
 
