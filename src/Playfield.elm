@@ -35,16 +35,6 @@ retrieveGrid field =
             grid
 
 
-isFull : Playfield -> Bool
-isFull field =
-    case field of
-        Full _ ->
-            True
-
-        _ ->
-            False
-
-
 isPossiblePosition : Tetromino -> Grid -> Bool
 isPossiblePosition tetromino grid =
     countCellAtState (\c -> isEmptyCell c || isMovingCell c) (T.positions tetromino) grid == 4

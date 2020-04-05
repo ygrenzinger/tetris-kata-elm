@@ -1,6 +1,6 @@
 module Tetris exposing (..)
 
-import Playfield as P exposing (Playfield)
+import Playfield as P exposing (Playfield(..))
 import ScoringSystem exposing (ScoringSystem, addRemovedLinesToScoring, initScoring)
 import Shape exposing (Shape, TetrominoShape, allShapes)
 import Tetromino exposing (TetrominoCommand(..))
@@ -18,6 +18,16 @@ type SpawnCommand
 startTetris : Tetris
 startTetris =
     { playfield = P.createPlayfield, availableShape = allShapes, scoringSystem = initScoring }
+
+
+isGameOver : Tetris -> Bool
+isGameOver { playfield } =
+    case playfield of
+        Full _ ->
+            True
+
+        _ ->
+            False
 
 
 timeSpentInRow : Tetris -> Float

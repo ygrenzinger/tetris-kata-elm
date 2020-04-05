@@ -14,12 +14,12 @@ import Html.Styled exposing (Attribute, Html, button, div, styled, text, toUnsty
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
-import Playfield exposing (Playfield, isFull, retrieveGrid)
+import Playfield exposing (Playfield, retrieveGrid)
 import Random
 import ScoringSystem exposing (ScoringSystem)
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
 import String exposing (fromInt)
-import Tetris as T exposing (SpawnCommand(..), Tetris, timeSpentInRow)
+import Tetris as T exposing (SpawnCommand(..), Tetris, isGameOver, timeSpentInRow)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
@@ -105,7 +105,7 @@ spawnTetromino shape availableShapes tetris =
         updatedTetris =
             T.spawnTetromino shape availableShapes tetris
     in
-    if isFull updatedTetris.playfield then
+    if isGameOver updatedTetris then
         ( GameOver updatedTetris, Cmd.none )
 
     else
