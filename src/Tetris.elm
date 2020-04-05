@@ -1,6 +1,6 @@
 module Tetris exposing (..)
 
-import Playfield as P exposing (Playfield, PlayfieldState(..))
+import Playfield as P exposing (Playfield)
 import ScoringSystem exposing (ScoringSystem, addRemovedLinesToScoring, initScoring)
 import Shape exposing (Shape, TetrominoShape, allShapes)
 import Tetromino exposing (TetrominoCommand(..))
@@ -44,11 +44,6 @@ makePieceFallDown tetris =
             ( { playfield = updatedField, availableShape = tetris.availableShape, scoringSystem = updatedScoringSystem }, SpawnRandomShape tetris.availableShape )
 
 
-spawnTetromino : TetrominoShape -> List TetrominoShape -> Tetris -> ( Tetris, PlayfieldState )
+spawnTetromino : TetrominoShape -> List TetrominoShape -> Tetris -> Tetris
 spawnTetromino shape availableShapes tetris =
-    case P.spawnTetromino shape tetris.playfield of
-        ( updatedField, P.Full ) ->
-            ( { tetris | playfield = updatedField }, Full )
-
-        ( updatedField, P.Playable ) ->
-            ( { tetris | playfield = updatedField }, Playable )
+    { playfield = P.spawnTetromino shape tetris.playfield, availableShape = availableShapes, scoringSystem = tetris.scoringSystem }

@@ -1,9 +1,8 @@
 module Fuzzing exposing (..)
 
 import Array
-import Fuzz exposing (Fuzzer, constant, frequency, int, intRange, list, map)
-import Random.Extra as Random
-import Shape exposing (Shape, TetrominoShape, allShapes, shapeI, shapeO)
+import Fuzz exposing (Fuzzer, constant, frequency, int, intRange, map)
+import Shape exposing (Shape, TetrominoShape, allShapes, shapeI)
 import Tetris exposing (Tetris, applyTetrominoCommand, makePieceFallDown, spawnTetromino)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 
@@ -54,5 +53,5 @@ fuzzTetrisAction : Fuzzer (Tetris -> Tetris)
 fuzzTetrisAction =
     frequency
         [ ( 9, fuzzTetrominoCommand |> map applyTetrominoCommand )
-        , ( 1, fuzzShape |> map (\s -> Tuple.first << spawnTetromino s [] << Tuple.first << makePieceFallDown << applyTetrominoCommand Drop) )
+        , ( 1, fuzzShape |> map (\s -> spawnTetromino s [] << Tuple.first << makePieceFallDown << applyTetrominoCommand Drop) )
         ]

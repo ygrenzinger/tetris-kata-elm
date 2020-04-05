@@ -27,7 +27,7 @@ countMovingCell rowRange columnRange =
 
 createPlayFieldWithShape : TetrominoShape -> Playfield
 createPlayFieldWithShape shape =
-    createPlayfield |> spawnTetromino shape |> Tuple.first
+    createPlayfield |> spawnTetromino shape
 
 
 makeTetrominoFallDownUntilBlocked : Playfield -> ( Playfield, Maybe Int )
@@ -120,8 +120,8 @@ suite =
                         createGrid
                             |> updateGrid (Fixed "000000") (buildPositions ( 20, 21 ) ( 0, 9 ))
 
-                    ( originalField, _ ) =
-                        Playfield Nothing grid |> spawnTetromino shapeO
+                    originalField =
+                        WaitingForTetromino grid |> spawnTetromino shapeO
 
                     field =
                         List.foldl applyCommand originalField (List.repeat 20 (Move MoveDown))
@@ -148,8 +148,8 @@ suite =
                             |> updateGrid (Fixed "000000") (buildPositions ( 19, 21 ) ( 0, 9 ))
                             |> updateGrid Empty (buildPositions ( 19, 21 ) ( 4, 5 ))
 
-                    ( originalField, _ ) =
-                        Playfield Nothing grid |> spawnTetromino shapeO
+                    originalField =
+                        WaitingForTetromino grid |> spawnTetromino shapeO
 
                     ( field, removedLines ) =
                         makeTetrominoFallDownUntilBlocked originalField

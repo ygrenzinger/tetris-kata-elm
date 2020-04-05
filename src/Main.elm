@@ -14,7 +14,7 @@ import Html.Styled exposing (Attribute, Html, button, div, styled, text, toUnsty
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
-import Playfield exposing (Playfield, PlayfieldState(..), retrieveGrid)
+import Playfield exposing (Playfield, isFull, retrieveGrid)
 import Random
 import ScoringSystem exposing (ScoringSystem)
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
@@ -101,12 +101,15 @@ update msg model =
 
 spawnTetromino : TetrominoShape -> List TetrominoShape -> Tetris -> ( Model, Cmd Msg )
 spawnTetromino shape availableShapes tetris =
-    case T.spawnTetromino shape availableShapes tetris of
-        ( updatedTetris, Full ) ->
-            ( GameOver updatedTetris, Cmd.none )
+    let
+        updatedTetris =
+            T.spawnTetromino shape availableShapes tetris
+    in
+    if isFull updatedTetris.playfield then
+        ( GameOver updatedTetris, Cmd.none )
 
-        ( updatedTetris, Playable ) ->
-            ( Playing updatedTetris, Cmd.none )
+    else
+        ( Playing updatedTetris, Cmd.none )
 
 
 applyGameLoop : Tetris -> ( Tetris, Cmd Msg )

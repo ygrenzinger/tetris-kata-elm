@@ -5,7 +5,7 @@ import Expect
 import Fuzz exposing (list)
 import Fuzzing exposing (fuzzTetrisAction)
 import Grid exposing (isRowFull)
-import Playfield exposing (PlayfieldState(..), retrieveGrid)
+import Playfield exposing (retrieveGrid)
 import Shape exposing (shapeO)
 import Test exposing (Test, describe, fuzzWith)
 import Tetris exposing (Tetris, spawnTetromino, startTetris)
@@ -20,7 +20,7 @@ suite =
                 let
                     init : Tetris
                     init =
-                        startTetris |> spawnTetromino shapeO [] |> Tuple.first
+                        startTetris |> spawnTetromino shapeO []
 
                     tetris : Tetris
                     tetris =

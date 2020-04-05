@@ -2,6 +2,7 @@ module Grid exposing (..)
 
 import Array exposing (Array, repeat)
 import Shape exposing (ShapeColor)
+import Tetromino as T exposing (Tetromino)
 
 
 type Cell
@@ -99,6 +100,26 @@ setCellState state ( i, j ) grid =
 projectPositions : Cell -> List ( Int, Int ) -> Grid -> Grid
 projectPositions cell positions grid =
     List.foldl (setCellState cell) grid positions
+
+
+projectTetromino : Cell -> Tetromino -> Grid -> Grid
+projectTetromino cell tetromino =
+    projectPositions cell (T.positions tetromino)
+
+
+removeTetromino : Tetromino -> Grid -> Grid
+removeTetromino =
+    projectTetromino Empty
+
+
+projectMovingTetromino : Tetromino -> Grid -> Grid
+projectMovingTetromino tetromino =
+    projectTetromino (Moving (T.getColor tetromino)) tetromino
+
+
+fixTetromino : Tetromino -> Grid -> Grid
+fixTetromino tetromino =
+    projectTetromino (Fixed (T.getColor tetromino)) tetromino
 
 
 cleanFullLines : Grid -> ( Grid, Int )
