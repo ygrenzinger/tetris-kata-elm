@@ -1,7 +1,7 @@
 module Playfield exposing (..)
 
 import Array exposing (Array)
-import Grid exposing (Cell(..), Grid, Row, cleanFullLines, countCellAtState, createRow, isEmptyCell, projectPositions)
+import Grid exposing (Cell(..), Grid, Row, cleanFullLines, countCellAtState, createRow, isEmptyCell, isMovingCell, projectPositions)
 import Shape exposing (Shape, ShapeColor, TetrominoShape, shapeSize)
 import Tetromino as T exposing (MoveCommand(..), Tetromino(..), TetrominoCommand(..))
 
@@ -31,8 +31,8 @@ retrieveGrid (PlayField _ grid) =
 
 
 isPossiblePosition : Tetromino -> PlayField -> Bool
-isPossiblePosition tetromino grid =
-    countCellAtState isEmptyCell (T.positions tetromino) (retrieveGrid grid) == 4
+isPossiblePosition tetromino field =
+    countCellAtState (\c -> isEmptyCell c || isMovingCell c) (T.positions tetromino) (retrieveGrid field) == 4
 
 
 spawnTetromino : TetrominoShape -> PlayField -> ( PlayField, PlayFieldState )
@@ -49,15 +49,10 @@ spawnTetromino shape field =
             Tetromino shape ( 0, columnPos )
     in
     if isPossiblePosition tetromino field then
-        ( projectTetrominoToGrid (Moving (T.getColor tetromino)) tetromino field, Playable )
+        ( projectMovingTetromino tetromino field, Playable )
 
     else
-        ( projectTetrominoToGrid (Fixed (T.getColor tetromino)) tetromino field, Full )
-
-
-projectTetrominoToGrid : Cell -> Tetromino -> PlayField -> PlayField
-projectTetrominoToGrid cell tetromino (PlayField _ grid) =
-    PlayField (Just tetromino) <| projectPositions cell (T.positions tetromino) grid
+        ( fixTetromino field, Full )
 
 
 applyCommand : TetrominoCommand -> PlayField -> PlayField
@@ -75,24 +70,15 @@ applyCommandOnTetromino command tetromino playfield =
     let
         updatedTetromino =
             T.applyCommand command tetromino
-
-        cleanedField =
-            projectTetrominoToGrid Empty tetromino playfield
-
-        isPossible =
-            isPossiblePosition updatedTetromino cleanedField
     in
-    case ( command, isPossible ) of
-        ( Drop, True ) ->
-            applyCommandOnTetromino Drop updatedTetromino cleanedField
+    case ( command, updateTetrominoPosition updatedTetromino playfield ) of
+        ( Drop, Just updatedField ) ->
+            applyCommandOnTetromino Drop updatedTetromino updatedField
 
-        ( Drop, False ) ->
-            projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) tetromino cleanedField
+        ( T.Rotate _, Just updatedField ) ->
+            updatedField
 
-        ( T.Rotate _, True ) ->
-            projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
-
-        ( T.Rotate (_ as rotateCommand), False ) ->
+        ( T.Rotate (_ as rotateCommand), Nothing ) ->
             case T.whichWallKickToAttempt tetromino of
                 Nothing ->
                     playfield
@@ -100,30 +86,11 @@ applyCommandOnTetromino command tetromino playfield =
                 Just wallKick ->
                     tryWallKick wallKick rotateCommand tetromino playfield
 
-        ( T.Move _, True ) ->
-            projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
+        ( T.Move _, Just updatedField ) ->
+            updatedField
 
         _ ->
             playfield
-
-
-dropTetromino : Tetromino -> PlayField -> PlayField
-dropTetromino tetromino playfield =
-    let
-        updatedTetromino =
-            T.applyCommand Drop tetromino
-
-        cleanedField =
-            projectTetrominoToGrid Empty tetromino playfield
-
-        isPossible =
-            isPossiblePosition updatedTetromino cleanedField
-    in
-    if isPossible then
-        dropTetromino updatedTetromino playfield
-
-    else
-        projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
 
 
 tryWallKick : T.WallKick -> T.RotateCommand -> Tetromino -> PlayField -> PlayField
@@ -147,18 +114,13 @@ tryWallKick wallKick command tetromino playfield =
                         T.RotateRight ->
                             T.rotateTetrominoRight
                    )
-
-        cleanedField =
-            projectTetrominoToGrid Empty tetromino playfield
-
-        isPossible =
-            isPossiblePosition updatedTetromino cleanedField
     in
-    if isPossible then
-        projectTetrominoToGrid (Moving (T.getColor updatedTetromino)) updatedTetromino cleanedField
+    case updateTetrominoPosition updatedTetromino playfield of
+        Just updatedField ->
+            updatedField
 
-    else
-        playfield
+        Nothing ->
+            playfield
 
 
 makeTetrominoFallDown : PlayField -> ( PlayField, Maybe Int )
@@ -178,12 +140,46 @@ tetrominoFallDown tetromino playfield =
             applyCommand (Move MoveDown) playfield
     in
     if Maybe.map (T.samePosition tetromino) updatedTetromino |> Maybe.withDefault False then
-        projectTetrominoToGrid (Fixed (T.getColor tetromino)) tetromino playfield
+        fixTetromino playfield
             |> cleanFullLinesAndRemoveTetromino
             |> Tuple.mapSecond Just
 
     else
         ( PlayField updatedTetromino updatedGrid, Nothing )
+
+
+removeTetromino : PlayField -> PlayField
+removeTetromino (PlayField tetromino grid) =
+    case tetromino of
+        Nothing ->
+            PlayField Nothing grid
+
+        Just t ->
+            PlayField Nothing <| projectPositions Empty (T.positions t) grid
+
+
+projectMovingTetromino : Tetromino -> PlayField -> PlayField
+projectMovingTetromino tetromino (PlayField _ grid) =
+    PlayField (Just tetromino) <| projectPositions (Moving (T.getColor tetromino)) (T.positions tetromino) grid
+
+
+fixTetromino : PlayField -> PlayField
+fixTetromino (PlayField tetromino grid) =
+    case tetromino of
+        Nothing ->
+            PlayField Nothing grid
+
+        Just t ->
+            PlayField Nothing <| projectPositions (Fixed (T.getColor t)) (T.positions t) grid
+
+
+updateTetrominoPosition : Tetromino -> PlayField -> Maybe PlayField
+updateTetrominoPosition updatedTetromino field =
+    if isPossiblePosition updatedTetromino field then
+        Just <| projectMovingTetromino updatedTetromino <| removeTetromino field
+
+    else
+        Nothing
 
 
 cleanFullLinesAndRemoveTetromino : PlayField -> ( PlayField, Int )
