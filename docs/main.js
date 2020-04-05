@@ -5871,9 +5871,8 @@ var $elm$time$Time$every = F2(
 var $elm$core$Platform$Sub$none = $elm$core$Platform$Sub$batch(_List_Nil);
 var $elm$core$Basics$pow = _Basics_pow;
 var $author$project$Tetris$timeSpentInRow = function (_v0) {
-	var _v1 = _v0.c;
-	var level = _v1.b;
-	return A2($elm$core$Basics$pow, 0.8 - ((level - 1) * 0.007), level - 1) * 1000;
+	var scoringSystem = _v0.scoringSystem;
+	return A2($elm$core$Basics$pow, 0.8 - ((scoringSystem.level - 1) * 0.007), scoringSystem.level - 1) * 1000;
 };
 var $author$project$Main$subscriptions = function (model) {
 	if (model.$ === 'Playing') {
@@ -6077,70 +6076,66 @@ var $elm$random$Random$generate = F2(
 			$elm$random$Random$Generate(
 				A2($elm$random$Random$map, tagger, generator)));
 	});
-var $author$project$Tetris$Keep = {$: 'Keep'};
+var $author$project$Tetris$None = {$: 'None'};
 var $author$project$Tetris$SpawnRandomShape = function (a) {
 	return {$: 'SpawnRandomShape', a: a};
 };
-var $author$project$Tetris$Tetris = F3(
-	function (a, b, c) {
-		return {$: 'Tetris', a: a, b: b, c: c};
+var $author$project$ScoringSystem$ScoringSystem = F3(
+	function (score, level, counter) {
+		return {counter: counter, level: level, score: score};
 	});
-var $author$project$Tetris$Scoring = F3(
-	function (a, b, c) {
-		return {$: 'Scoring', a: a, b: b, c: c};
+var $author$project$ScoringSystem$counterDict = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(1, 1),
+			_Utils_Tuple2(2, 3),
+			_Utils_Tuple2(3, 5),
+			_Utils_Tuple2(4, 8)
+		]));
+var $author$project$ScoringSystem$scoreDict = $elm$core$Dict$fromList(
+	_List_fromArray(
+		[
+			_Utils_Tuple2(1, 40),
+			_Utils_Tuple2(2, 100),
+			_Utils_Tuple2(3, 300),
+			_Utils_Tuple2(4, 1200)
+		]));
+var $elm$core$Maybe$withDefault = F2(
+	function (_default, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return value;
+		} else {
+			return _default;
+		}
 	});
-var $author$project$Tetris$addRemovedLinesToScoring = F2(
+var $author$project$ScoringSystem$addRemovedLinesToScoring = F2(
 	function (numberOfRemovedLines, _v0) {
-		var score = _v0.a;
-		var level = _v0.b;
-		var counter = _v0.c;
-		var updatedCounter = counter + function () {
-			switch (numberOfRemovedLines) {
-				case 1:
-					return 1;
-				case 2:
-					return 3;
-				case 3:
-					return 5;
-				case 4:
-					return 8;
-				default:
-					return 0;
-			}
-		}();
+		var score = _v0.score;
+		var level = _v0.level;
+		var counter = _v0.counter;
+		var updatedCounter = counter + A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($elm$core$Dict$get, numberOfRemovedLines, $author$project$ScoringSystem$counterDict));
 		var updatedLevel = $elm$core$Basics$floor(updatedCounter / (5 * level)) + 1;
-		var scoreByLines = function () {
-			switch (numberOfRemovedLines) {
-				case 1:
-					return 40;
-				case 2:
-					return 100;
-				case 3:
-					return 300;
-				case 4:
-					return 1200;
-				default:
-					return 0;
-			}
-		}();
+		var scoreByLines = A2(
+			$elm$core$Maybe$withDefault,
+			0,
+			A2($elm$core$Dict$get, numberOfRemovedLines, $author$project$ScoringSystem$scoreDict));
 		var updatedScore = score + (scoreByLines * level);
-		return A3($author$project$Tetris$Scoring, updatedScore, updatedLevel, updatedCounter);
+		return A3($author$project$ScoringSystem$ScoringSystem, updatedScore, updatedLevel, updatedCounter);
 	});
-var $author$project$Playfield$PlayField = F2(
-	function (a, b) {
-		return {$: 'PlayField', a: a, b: b};
-	});
-var $author$project$Playfield$Fixed = function (a) {
-	return {$: 'Fixed', a: a};
-};
 var $author$project$Tetromino$Move = function (a) {
 	return {$: 'Move', a: a};
 };
 var $author$project$Tetromino$MoveDown = {$: 'MoveDown'};
-var $author$project$Tetromino$Drop = {$: 'Drop'};
-var $author$project$Playfield$Empty = {$: 'Empty'};
-var $author$project$Playfield$Moving = function (a) {
-	return {$: 'Moving', a: a};
+var $author$project$Playfield$Playable = F2(
+	function (a, b) {
+		return {$: 'Playable', a: a, b: b};
+	});
+var $author$project$Playfield$WaitingForTetromino = function (a) {
+	return {$: 'WaitingForTetromino', a: a};
 };
 var $author$project$Tetromino$Tetromino = F2(
 	function (a, b) {
@@ -6442,413 +6437,7 @@ var $author$project$Tetromino$applyCommand = function (command) {
 			return $author$project$Tetromino$moveTetrominoDown;
 	}
 };
-var $author$project$Shape$getColor = function (_v0) {
-	var color = _v0.b;
-	return color;
-};
-var $author$project$Tetromino$getColor = function (_v0) {
-	var shape = _v0.a;
-	return $author$project$Shape$getColor(shape);
-};
-var $elm$core$Maybe$andThen = F2(
-	function (callback, maybeValue) {
-		if (maybeValue.$ === 'Just') {
-			var value = maybeValue.a;
-			return callback(value);
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$Bitwise$and = _Bitwise_and;
-var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
-var $elm$core$Basics$ge = _Utils_ge;
-var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
-var $elm$core$Array$getHelp = F3(
-	function (shift, index, tree) {
-		getHelp:
-		while (true) {
-			var pos = $elm$core$Array$bitMask & (index >>> shift);
-			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-			if (_v0.$ === 'SubTree') {
-				var subTree = _v0.a;
-				var $temp$shift = shift - $elm$core$Array$shiftStep,
-					$temp$index = index,
-					$temp$tree = subTree;
-				shift = $temp$shift;
-				index = $temp$index;
-				tree = $temp$tree;
-				continue getHelp;
-			} else {
-				var values = _v0.a;
-				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
-			}
-		}
-	});
-var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
-var $elm$core$Array$tailIndex = function (len) {
-	return (len >>> 5) << 5;
-};
-var $elm$core$Array$get = F2(
-	function (index, _v0) {
-		var len = _v0.a;
-		var startShift = _v0.b;
-		var tree = _v0.c;
-		var tail = _v0.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
-			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
-			A3($elm$core$Array$getHelp, startShift, index, tree)));
-	});
-var $author$project$Playfield$getCellState = F2(
-	function (grid, _v0) {
-		var i = _v0.a;
-		var j = _v0.b;
-		return A2(
-			$elm$core$Maybe$andThen,
-			$elm$core$Array$get(j),
-			A2($elm$core$Array$get, i, grid));
-	});
-var $elm$core$Maybe$map = F2(
-	function (f, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return $elm$core$Maybe$Just(
-				f(value));
-		} else {
-			return $elm$core$Maybe$Nothing;
-		}
-	});
-var $elm$core$List$sum = function (numbers) {
-	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
-};
-var $elm$core$Maybe$withDefault = F2(
-	function (_default, maybe) {
-		if (maybe.$ === 'Just') {
-			var value = maybe.a;
-			return value;
-		} else {
-			return _default;
-		}
-	});
-var $author$project$Playfield$countCellAtState = F3(
-	function (fn, positions, _v0) {
-		var grid = _v0.b;
-		return $elm$core$List$sum(
-			A2(
-				$elm$core$List$map,
-				function (pos) {
-					return A2(
-						$elm$core$Maybe$withDefault,
-						false,
-						A2(
-							$elm$core$Maybe$map,
-							fn,
-							A2($author$project$Playfield$getCellState, grid, pos))) ? 1 : 0;
-				},
-				positions));
-	});
-var $author$project$Playfield$isEmptyCell = function (cell) {
-	if (cell.$ === 'Empty') {
-		return true;
-	} else {
-		return false;
-	}
-};
-var $elm$core$List$filter = F2(
-	function (isGood, list) {
-		return A3(
-			$elm$core$List$foldr,
-			F2(
-				function (x, xs) {
-					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
-				}),
-			_List_Nil,
-			list);
-	});
-var $author$project$Shape$isFull = function (cell) {
-	return _Utils_eq(cell, $author$project$Shape$Full) ? true : false;
-};
-var $author$project$Shape$cellPositions = function (_v0) {
-	var shape = _v0.c;
-	var isFullPos = function (_v2) {
-		var cell = _v2.c;
-		return $author$project$Shape$isFull(cell);
-	};
-	var cells = $elm$core$List$concat(
-		A2(
-			$elm$core$List$indexedMap,
-			F2(
-				function (i, row) {
-					return A2(
-						$elm$core$List$indexedMap,
-						F2(
-							function (j, cell) {
-								return _Utils_Tuple3(i, j, cell);
-							}),
-						row);
-				}),
-			shape));
-	return A2(
-		$elm$core$List$map,
-		function (_v1) {
-			var i = _v1.a;
-			var j = _v1.b;
-			return _Utils_Tuple2(i, j);
-		},
-		A2($elm$core$List$filter, isFullPos, cells));
-};
-var $author$project$Tetromino$positions = function (_v0) {
-	var shape = _v0.a;
-	var _v1 = _v0.b;
-	var i = _v1.a;
-	var j = _v1.b;
-	return A2(
-		$elm$core$List$map,
-		function (_v2) {
-			var ii = _v2.a;
-			var jj = _v2.b;
-			return _Utils_Tuple2(ii + i, jj + j);
-		},
-		$author$project$Shape$cellPositions(shape));
-};
-var $author$project$Playfield$isPossiblePosition = F2(
-	function (tetromino, grid) {
-		return A3(
-			$author$project$Playfield$countCellAtState,
-			$author$project$Playfield$isEmptyCell,
-			$author$project$Tetromino$positions(tetromino),
-			grid) === 4;
-	});
-var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
-var $elm$core$Array$setHelp = F4(
-	function (shift, index, value, tree) {
-		var pos = $elm$core$Array$bitMask & (index >>> shift);
-		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
-		if (_v0.$ === 'SubTree') {
-			var subTree = _v0.a;
-			var newSub = A4($elm$core$Array$setHelp, shift - $elm$core$Array$shiftStep, index, value, subTree);
-			return A3(
-				$elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				$elm$core$Array$SubTree(newSub),
-				tree);
-		} else {
-			var values = _v0.a;
-			var newLeaf = A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, values);
-			return A3(
-				$elm$core$Elm$JsArray$unsafeSet,
-				pos,
-				$elm$core$Array$Leaf(newLeaf),
-				tree);
-		}
-	});
-var $elm$core$Array$set = F3(
-	function (index, value, array) {
-		var len = array.a;
-		var startShift = array.b;
-		var tree = array.c;
-		var tail = array.d;
-		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
-			index,
-			$elm$core$Array$tailIndex(len)) > -1) ? A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			tree,
-			A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, tail)) : A4(
-			$elm$core$Array$Array_elm_builtin,
-			len,
-			startShift,
-			A4($elm$core$Array$setHelp, startShift, index, value, tree),
-			tail));
-	});
-var $author$project$Playfield$updateRow = $elm$core$Array$set;
-var $author$project$Playfield$setCellState = F3(
-	function (state, _v0, grid) {
-		var i = _v0.a;
-		var j = _v0.b;
-		var updatedRow = A2(
-			$elm$core$Maybe$map,
-			A2($author$project$Playfield$updateRow, j, state),
-			A2($elm$core$Array$get, i, grid));
-		return A2(
-			$elm$core$Maybe$withDefault,
-			grid,
-			A2(
-				$elm$core$Maybe$map,
-				function (r) {
-					return A3($elm$core$Array$set, i, r, grid);
-				},
-				updatedRow));
-	});
-var $author$project$Playfield$projectTetrominoToGrid = F3(
-	function (cell, tetromino, _v0) {
-		var grid = _v0.b;
-		return A2(
-			$author$project$Playfield$PlayField,
-			$elm$core$Maybe$Just(tetromino),
-			A3(
-				$elm$core$List$foldl,
-				$author$project$Playfield$setCellState(cell),
-				grid,
-				$author$project$Tetromino$positions(tetromino)));
-	});
-var $elm$core$List$repeatHelp = F3(
-	function (result, n, value) {
-		repeatHelp:
-		while (true) {
-			if (n <= 0) {
-				return result;
-			} else {
-				var $temp$result = A2($elm$core$List$cons, value, result),
-					$temp$n = n - 1,
-					$temp$value = value;
-				result = $temp$result;
-				n = $temp$n;
-				value = $temp$value;
-				continue repeatHelp;
-			}
-		}
-	});
-var $elm$core$List$repeat = F2(
-	function (n, value) {
-		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
-	});
-var $author$project$Playfield$tryWallKick = F4(
-	function (wallKick, command, tetromino, playfield) {
-		var doWallKickFn = function () {
-			if (wallKick.$ === 'LeftWallKick') {
-				var i = wallKick.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (f, g) {
-							return A2($elm$core$Basics$composeL, f, g);
-						}),
-					$author$project$Tetromino$moveTetrominoRight,
-					A2($elm$core$List$repeat, i - 1, $author$project$Tetromino$moveTetrominoRight));
-			} else {
-				var i = wallKick.a;
-				return A3(
-					$elm$core$List$foldl,
-					F2(
-						function (f, g) {
-							return A2($elm$core$Basics$composeL, f, g);
-						}),
-					$author$project$Tetromino$moveTetrominoLeft,
-					A2($elm$core$List$repeat, i - 1, $author$project$Tetromino$moveTetrominoLeft));
-			}
-		}();
-		var updatedTetromino = function () {
-			if (command.$ === 'RotateLeft') {
-				return $author$project$Tetromino$rotateTetrominoLeft;
-			} else {
-				return $author$project$Tetromino$rotateTetrominoRight;
-			}
-		}()(
-			doWallKickFn(tetromino));
-		var cleanedField = A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Empty, tetromino, playfield);
-		var isPossible = A2($author$project$Playfield$isPossiblePosition, updatedTetromino, cleanedField);
-		return isPossible ? A3(
-			$author$project$Playfield$projectTetrominoToGrid,
-			$author$project$Playfield$Moving(
-				$author$project$Tetromino$getColor(updatedTetromino)),
-			updatedTetromino,
-			cleanedField) : playfield;
-	});
-var $author$project$Tetromino$LeftWallKick = function (a) {
-	return {$: 'LeftWallKick', a: a};
-};
-var $author$project$Tetromino$RightWallKick = function (a) {
-	return {$: 'RightWallKick', a: a};
-};
-var $elm$core$Basics$negate = function (n) {
-	return -n;
-};
-var $author$project$Shape$shapeSize = function (_v0) {
-	var shape = _v0.c;
-	return $elm$core$List$length(shape);
-};
-var $author$project$Tetromino$whichWallKickToAttempt = function (_v0) {
-	var shape = _v0.a;
-	var _v1 = _v0.b;
-	var j = _v1.b;
-	return (j < 0) ? $elm$core$Maybe$Just(
-		$author$project$Tetromino$LeftWallKick(-j)) : (((j + $author$project$Shape$shapeSize(shape)) >= 9) ? $elm$core$Maybe$Just(
-		$author$project$Tetromino$RightWallKick(
-			(j + $author$project$Shape$shapeSize(shape)) - 10)) : $elm$core$Maybe$Nothing);
-};
-var $author$project$Playfield$applyCommandOnTetromino = F3(
-	function (command, tetromino, playfield) {
-		applyCommandOnTetromino:
-		while (true) {
-			var updatedTetromino = A2($author$project$Tetromino$applyCommand, command, tetromino);
-			var cleanedField = A3($author$project$Playfield$projectTetrominoToGrid, $author$project$Playfield$Empty, tetromino, playfield);
-			var isPossible = A2($author$project$Playfield$isPossiblePosition, updatedTetromino, cleanedField);
-			var _v0 = _Utils_Tuple2(command, isPossible);
-			if (!_v0.b) {
-				switch (_v0.a.$) {
-					case 'Drop':
-						var _v2 = _v0.a;
-						return A3(
-							$author$project$Playfield$projectTetrominoToGrid,
-							$author$project$Playfield$Moving(
-								$author$project$Tetromino$getColor(updatedTetromino)),
-							tetromino,
-							cleanedField);
-					case 'Rotate':
-						var rotateCommand = _v0.a.a;
-						var _v3 = $author$project$Tetromino$whichWallKickToAttempt(tetromino);
-						if (_v3.$ === 'Nothing') {
-							return playfield;
-						} else {
-							var wallKick = _v3.a;
-							return A4($author$project$Playfield$tryWallKick, wallKick, rotateCommand, tetromino, playfield);
-						}
-					default:
-						return playfield;
-				}
-			} else {
-				switch (_v0.a.$) {
-					case 'Drop':
-						var _v1 = _v0.a;
-						var $temp$command = $author$project$Tetromino$Drop,
-							$temp$tetromino = updatedTetromino,
-							$temp$playfield = cleanedField;
-						command = $temp$command;
-						tetromino = $temp$tetromino;
-						playfield = $temp$playfield;
-						continue applyCommandOnTetromino;
-					case 'Rotate':
-						return A3(
-							$author$project$Playfield$projectTetrominoToGrid,
-							$author$project$Playfield$Moving(
-								$author$project$Tetromino$getColor(updatedTetromino)),
-							updatedTetromino,
-							cleanedField);
-					default:
-						return A3(
-							$author$project$Playfield$projectTetrominoToGrid,
-							$author$project$Playfield$Moving(
-								$author$project$Tetromino$getColor(updatedTetromino)),
-							updatedTetromino,
-							cleanedField);
-				}
-			}
-		}
-	});
-var $author$project$Playfield$applyCommand = F2(
-	function (command, playfield) {
-		if (playfield.a.$ === 'Just') {
-			var tetromino = playfield.a.a;
-			return A3($author$project$Playfield$applyCommandOnTetromino, command, tetromino, playfield);
-		} else {
-			var p = playfield;
-			var _v1 = p.a;
-			return p;
-		}
-	});
+var $author$project$Grid$Empty = {$: 'Empty'};
 var $elm$core$Array$repeat = F2(
 	function (n, e) {
 		return A2(
@@ -6858,7 +6447,7 @@ var $elm$core$Array$repeat = F2(
 				return e;
 			});
 	});
-var $author$project$Playfield$createRow = A2($elm$core$Array$repeat, 10, $author$project$Playfield$Empty);
+var $author$project$Grid$createRow = A2($elm$core$Array$repeat, 10, $author$project$Grid$Empty);
 var $elm$core$Array$fromListHelp = F3(
 	function (list, nodeList, nodeListSize) {
 		fromListHelp:
@@ -6923,23 +6512,23 @@ var $elm$core$List$all = F2(
 			A2($elm$core$Basics$composeL, $elm$core$Basics$not, isOkay),
 			list);
 	});
-var $author$project$Playfield$isFixedCell = function (cell) {
+var $author$project$Grid$isFixedCell = function (cell) {
 	if (cell.$ === 'Fixed') {
 		return true;
 	} else {
 		return false;
 	}
 };
-var $author$project$Playfield$isRowFull = A2(
+var $author$project$Grid$isRowFull = A2(
 	$elm$core$Basics$composeL,
-	$elm$core$List$all($author$project$Playfield$isFixedCell),
+	$elm$core$List$all($author$project$Grid$isFixedCell),
 	$elm$core$Array$toList);
-var $author$project$Playfield$removeFullRows = F3(
+var $author$project$Grid$removeFullRows = F3(
 	function (previous, _new, numberOfRemovedLines) {
 		var cleanRow = F2(
 			function (head, rest) {
-				return $author$project$Playfield$isRowFull(head) ? A3($author$project$Playfield$removeFullRows, rest, _new, numberOfRemovedLines + 1) : A3(
-					$author$project$Playfield$removeFullRows,
+				return $author$project$Grid$isRowFull(head) ? A3($author$project$Grid$removeFullRows, rest, _new, numberOfRemovedLines + 1) : A3(
+					$author$project$Grid$removeFullRows,
 					rest,
 					A2($elm$core$List$cons, head, _new),
 					numberOfRemovedLines);
@@ -6957,22 +6546,251 @@ var $author$project$Playfield$removeFullRows = F3(
 			}
 		}
 	});
-var $author$project$Playfield$cleanFullLinesAndRemoveTetromino = function (_v0) {
-	var grid = _v0.b;
+var $elm$core$List$repeatHelp = F3(
+	function (result, n, value) {
+		repeatHelp:
+		while (true) {
+			if (n <= 0) {
+				return result;
+			} else {
+				var $temp$result = A2($elm$core$List$cons, value, result),
+					$temp$n = n - 1,
+					$temp$value = value;
+				result = $temp$result;
+				n = $temp$n;
+				value = $temp$value;
+				continue repeatHelp;
+			}
+		}
+	});
+var $elm$core$List$repeat = F2(
+	function (n, value) {
+		return A3($elm$core$List$repeatHelp, _List_Nil, n, value);
+	});
+var $author$project$Grid$cleanFullLines = function (grid) {
 	var rows = $elm$core$List$reverse(
 		$elm$core$Array$toList(grid));
-	var _v1 = A3($author$project$Playfield$removeFullRows, rows, _List_Nil, 0);
-	var cleanedRows = _v1.a;
-	var numberOfRemovedLines = _v1.b;
+	var _v0 = A3($author$project$Grid$removeFullRows, rows, _List_Nil, 0);
+	var cleanedRows = _v0.a;
+	var numberOfRemovedLines = _v0.b;
 	var updatedGrid = $elm$core$Array$fromList(
 		A2(
 			$elm$core$List$append,
-			A2($elm$core$List$repeat, numberOfRemovedLines, $author$project$Playfield$createRow),
+			A2($elm$core$List$repeat, numberOfRemovedLines, $author$project$Grid$createRow),
 			cleanedRows));
-	return _Utils_Tuple2(
-		A2($author$project$Playfield$PlayField, $elm$core$Maybe$Nothing, updatedGrid),
-		numberOfRemovedLines);
+	return _Utils_Tuple2(updatedGrid, numberOfRemovedLines);
 };
+var $author$project$Grid$Fixed = function (a) {
+	return {$: 'Fixed', a: a};
+};
+var $author$project$Shape$getColor = function (_v0) {
+	var color = _v0.b;
+	return color;
+};
+var $author$project$Tetromino$getColor = function (_v0) {
+	var shape = _v0.a;
+	return $author$project$Shape$getColor(shape);
+};
+var $elm$core$List$filter = F2(
+	function (isGood, list) {
+		return A3(
+			$elm$core$List$foldr,
+			F2(
+				function (x, xs) {
+					return isGood(x) ? A2($elm$core$List$cons, x, xs) : xs;
+				}),
+			_List_Nil,
+			list);
+	});
+var $author$project$Shape$isFull = function (cell) {
+	return _Utils_eq(cell, $author$project$Shape$Full) ? true : false;
+};
+var $author$project$Shape$cellPositions = function (_v0) {
+	var shape = _v0.c;
+	var isFullPos = function (_v2) {
+		var cell = _v2.c;
+		return $author$project$Shape$isFull(cell);
+	};
+	var cells = $elm$core$List$concat(
+		A2(
+			$elm$core$List$indexedMap,
+			F2(
+				function (i, row) {
+					return A2(
+						$elm$core$List$indexedMap,
+						F2(
+							function (j, cell) {
+								return _Utils_Tuple3(i, j, cell);
+							}),
+						row);
+				}),
+			shape));
+	return A2(
+		$elm$core$List$map,
+		function (_v1) {
+			var i = _v1.a;
+			var j = _v1.b;
+			return _Utils_Tuple2(i, j);
+		},
+		A2($elm$core$List$filter, isFullPos, cells));
+};
+var $author$project$Tetromino$positions = function (_v0) {
+	var shape = _v0.a;
+	var _v1 = _v0.b;
+	var i = _v1.a;
+	var j = _v1.b;
+	return A2(
+		$elm$core$List$map,
+		function (_v2) {
+			var ii = _v2.a;
+			var jj = _v2.b;
+			return _Utils_Tuple2(ii + i, jj + j);
+		},
+		$author$project$Shape$cellPositions(shape));
+};
+var $elm$core$Bitwise$and = _Bitwise_and;
+var $elm$core$Array$bitMask = 4294967295 >>> (32 - $elm$core$Array$shiftStep);
+var $elm$core$Basics$ge = _Utils_ge;
+var $elm$core$Elm$JsArray$unsafeGet = _JsArray_unsafeGet;
+var $elm$core$Array$getHelp = F3(
+	function (shift, index, tree) {
+		getHelp:
+		while (true) {
+			var pos = $elm$core$Array$bitMask & (index >>> shift);
+			var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+			if (_v0.$ === 'SubTree') {
+				var subTree = _v0.a;
+				var $temp$shift = shift - $elm$core$Array$shiftStep,
+					$temp$index = index,
+					$temp$tree = subTree;
+				shift = $temp$shift;
+				index = $temp$index;
+				tree = $temp$tree;
+				continue getHelp;
+			} else {
+				var values = _v0.a;
+				return A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, values);
+			}
+		}
+	});
+var $elm$core$Bitwise$shiftLeftBy = _Bitwise_shiftLeftBy;
+var $elm$core$Array$tailIndex = function (len) {
+	return (len >>> 5) << 5;
+};
+var $elm$core$Array$get = F2(
+	function (index, _v0) {
+		var len = _v0.a;
+		var startShift = _v0.b;
+		var tree = _v0.c;
+		var tail = _v0.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? $elm$core$Maybe$Nothing : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? $elm$core$Maybe$Just(
+			A2($elm$core$Elm$JsArray$unsafeGet, $elm$core$Array$bitMask & index, tail)) : $elm$core$Maybe$Just(
+			A3($elm$core$Array$getHelp, startShift, index, tree)));
+	});
+var $elm$core$Maybe$map = F2(
+	function (f, maybe) {
+		if (maybe.$ === 'Just') {
+			var value = maybe.a;
+			return $elm$core$Maybe$Just(
+				f(value));
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
+	});
+var $elm$core$Elm$JsArray$unsafeSet = _JsArray_unsafeSet;
+var $elm$core$Array$setHelp = F4(
+	function (shift, index, value, tree) {
+		var pos = $elm$core$Array$bitMask & (index >>> shift);
+		var _v0 = A2($elm$core$Elm$JsArray$unsafeGet, pos, tree);
+		if (_v0.$ === 'SubTree') {
+			var subTree = _v0.a;
+			var newSub = A4($elm$core$Array$setHelp, shift - $elm$core$Array$shiftStep, index, value, subTree);
+			return A3(
+				$elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				$elm$core$Array$SubTree(newSub),
+				tree);
+		} else {
+			var values = _v0.a;
+			var newLeaf = A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, values);
+			return A3(
+				$elm$core$Elm$JsArray$unsafeSet,
+				pos,
+				$elm$core$Array$Leaf(newLeaf),
+				tree);
+		}
+	});
+var $elm$core$Array$set = F3(
+	function (index, value, array) {
+		var len = array.a;
+		var startShift = array.b;
+		var tree = array.c;
+		var tail = array.d;
+		return ((index < 0) || (_Utils_cmp(index, len) > -1)) ? array : ((_Utils_cmp(
+			index,
+			$elm$core$Array$tailIndex(len)) > -1) ? A4(
+			$elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			tree,
+			A3($elm$core$Elm$JsArray$unsafeSet, $elm$core$Array$bitMask & index, value, tail)) : A4(
+			$elm$core$Array$Array_elm_builtin,
+			len,
+			startShift,
+			A4($elm$core$Array$setHelp, startShift, index, value, tree),
+			tail));
+	});
+var $author$project$Grid$updateRow = $elm$core$Array$set;
+var $author$project$Grid$setCellState = F3(
+	function (state, _v0, grid) {
+		var i = _v0.a;
+		var j = _v0.b;
+		var updatedRow = A2(
+			$elm$core$Maybe$map,
+			A2($author$project$Grid$updateRow, j, state),
+			A2($elm$core$Array$get, i, grid));
+		return A2(
+			$elm$core$Maybe$withDefault,
+			grid,
+			A2(
+				$elm$core$Maybe$map,
+				function (r) {
+					return A3($elm$core$Array$set, i, r, grid);
+				},
+				updatedRow));
+	});
+var $author$project$Grid$projectPositions = F3(
+	function (cell, positions, grid) {
+		return A3(
+			$elm$core$List$foldl,
+			$author$project$Grid$setCellState(cell),
+			grid,
+			positions);
+	});
+var $author$project$Grid$projectTetromino = F2(
+	function (cell, tetromino) {
+		return A2(
+			$author$project$Grid$projectPositions,
+			cell,
+			$author$project$Tetromino$positions(tetromino));
+	});
+var $author$project$Grid$fixTetromino = function (tetromino) {
+	return A2(
+		$author$project$Grid$projectTetromino,
+		$author$project$Grid$Fixed(
+			$author$project$Tetromino$getColor(tetromino)),
+		tetromino);
+};
+var $elm$core$Tuple$mapFirst = F2(
+	function (func, _v0) {
+		var x = _v0.a;
+		var y = _v0.b;
+		return _Utils_Tuple2(
+			func(x),
+			y);
+	});
 var $elm$core$Tuple$mapSecond = F2(
 	function (func, _v0) {
 		var x = _v0.a;
@@ -6981,79 +6799,135 @@ var $elm$core$Tuple$mapSecond = F2(
 			x,
 			func(y));
 	});
-var $author$project$Tetromino$samePosition = F2(
-	function (_v0, _v2) {
-		var _v1 = _v0.b;
-		var a = _v1.a;
-		var b = _v1.b;
-		var _v3 = _v2.b;
-		var c = _v3.a;
-		var d = _v3.b;
-		return _Utils_eq(a, c) && _Utils_eq(b, d);
+var $author$project$Grid$removeTetromino = $author$project$Grid$projectTetromino($author$project$Grid$Empty);
+var $elm$core$Maybe$andThen = F2(
+	function (callback, maybeValue) {
+		if (maybeValue.$ === 'Just') {
+			var value = maybeValue.a;
+			return callback(value);
+		} else {
+			return $elm$core$Maybe$Nothing;
+		}
 	});
-var $author$project$Playfield$tetrominoFallDown = F2(
-	function (tetromino, playfield) {
-		var _v0 = A2(
-			$author$project$Playfield$applyCommand,
-			$author$project$Tetromino$Move($author$project$Tetromino$MoveDown),
-			playfield);
-		var updatedTetromino = _v0.a;
-		var updatedGrid = _v0.b;
+var $author$project$Grid$getCellState = F2(
+	function (grid, _v0) {
+		var i = _v0.a;
+		var j = _v0.b;
 		return A2(
-			$elm$core$Maybe$withDefault,
-			false,
+			$elm$core$Maybe$andThen,
+			$elm$core$Array$get(j),
+			A2($elm$core$Array$get, i, grid));
+	});
+var $elm$core$List$sum = function (numbers) {
+	return A3($elm$core$List$foldl, $elm$core$Basics$add, 0, numbers);
+};
+var $author$project$Grid$countCellAtState = F3(
+	function (fn, positions, grid) {
+		return $elm$core$List$sum(
 			A2(
-				$elm$core$Maybe$map,
-				$author$project$Tetromino$samePosition(tetromino),
-				updatedTetromino)) ? A2(
-			$elm$core$Tuple$mapSecond,
-			$elm$core$Maybe$Just,
-			$author$project$Playfield$cleanFullLinesAndRemoveTetromino(
-				A3(
-					$author$project$Playfield$projectTetrominoToGrid,
-					$author$project$Playfield$Fixed(
-						$author$project$Tetromino$getColor(tetromino)),
-					tetromino,
-					playfield))) : _Utils_Tuple2(
-			A2($author$project$Playfield$PlayField, updatedTetromino, updatedGrid),
-			$elm$core$Maybe$Nothing);
+				$elm$core$List$map,
+				function (pos) {
+					return A2(
+						$elm$core$Maybe$withDefault,
+						false,
+						A2(
+							$elm$core$Maybe$map,
+							fn,
+							A2($author$project$Grid$getCellState, grid, pos))) ? 1 : 0;
+				},
+				positions));
 	});
-var $author$project$Playfield$makeTetrominoFallDown = function (_v0) {
-	var tetromino = _v0.a;
-	var grid = _v0.b;
-	if (tetromino.$ === 'Nothing') {
-		return _Utils_Tuple2(
-			A2($author$project$Playfield$PlayField, tetromino, grid),
-			$elm$core$Maybe$Nothing);
+var $author$project$Grid$isEmptyCell = function (cell) {
+	if (cell.$ === 'Empty') {
+		return true;
 	} else {
-		var t = tetromino.a;
-		return A2(
-			$author$project$Playfield$tetrominoFallDown,
-			t,
-			A2($author$project$Playfield$PlayField, tetromino, grid));
+		return false;
 	}
 };
-var $author$project$Tetris$makePieceFallDown = function (_v0) {
-	var field = _v0.a;
-	var shapes = _v0.b;
-	var score = _v0.c;
-	var _v1 = $author$project$Playfield$makeTetrominoFallDown(field);
-	if (_v1.b.$ === 'Nothing') {
-		var updatedField = _v1.a;
-		var _v2 = _v1.b;
-		return _Utils_Tuple2(
-			A3($author$project$Tetris$Tetris, updatedField, shapes, score),
-			$author$project$Tetris$Keep);
+var $author$project$Grid$isMovingCell = function (cell) {
+	if (cell.$ === 'Moving') {
+		return true;
 	} else {
-		var updatedField = _v1.a;
-		var numberOfRemovedLines = _v1.b.a;
+		return false;
+	}
+};
+var $author$project$Playfield$isPossiblePosition = F2(
+	function (tetromino, grid) {
+		return A3(
+			$author$project$Grid$countCellAtState,
+			function (c) {
+				return $author$project$Grid$isEmptyCell(c) || $author$project$Grid$isMovingCell(c);
+			},
+			$author$project$Tetromino$positions(tetromino),
+			grid) === 4;
+	});
+var $author$project$Grid$Moving = function (a) {
+	return {$: 'Moving', a: a};
+};
+var $author$project$Grid$projectMovingTetromino = function (tetromino) {
+	return A2(
+		$author$project$Grid$projectTetromino,
+		$author$project$Grid$Moving(
+			$author$project$Tetromino$getColor(tetromino)),
+		tetromino);
+};
+var $author$project$Playfield$updateTetrominoPosition = F2(
+	function (tetromino, grid) {
+		return A2($author$project$Playfield$isPossiblePosition, tetromino, grid) ? $elm$core$Maybe$Just(
+			A2($author$project$Grid$projectMovingTetromino, tetromino, grid)) : $elm$core$Maybe$Nothing;
+	});
+var $author$project$Playfield$tetrominoFallDown = F2(
+	function (tetromino, grid) {
+		var updatedTetromino = A2(
+			$author$project$Tetromino$applyCommand,
+			$author$project$Tetromino$Move($author$project$Tetromino$MoveDown),
+			tetromino);
+		var possibleGrid = A2(
+			$author$project$Playfield$updateTetrominoPosition,
+			updatedTetromino,
+			A2($author$project$Grid$removeTetromino, tetromino, grid));
+		if (possibleGrid.$ === 'Just') {
+			var updatedGrid = possibleGrid.a;
+			return _Utils_Tuple2(
+				A2($author$project$Playfield$Playable, updatedTetromino, updatedGrid),
+				$elm$core$Maybe$Nothing);
+		} else {
+			return A2(
+				$elm$core$Tuple$mapSecond,
+				$elm$core$Maybe$Just,
+				A2(
+					$elm$core$Tuple$mapFirst,
+					$author$project$Playfield$WaitingForTetromino,
+					$author$project$Grid$cleanFullLines(
+						A2($author$project$Grid$fixTetromino, tetromino, grid))));
+		}
+	});
+var $author$project$Playfield$makeTetrominoFallDown = function (field) {
+	if (field.$ === 'Playable') {
+		var tetromino = field.a;
+		var grid = field.b;
+		return A2($author$project$Playfield$tetrominoFallDown, tetromino, grid);
+	} else {
+		return _Utils_Tuple2(field, $elm$core$Maybe$Nothing);
+	}
+};
+var $author$project$Tetris$makePieceFallDown = function (tetris) {
+	var _v0 = $author$project$Playfield$makeTetrominoFallDown(tetris.playfield);
+	if (_v0.b.$ === 'Nothing') {
+		var updatedField = _v0.a;
+		var _v1 = _v0.b;
 		return _Utils_Tuple2(
-			A3(
-				$author$project$Tetris$Tetris,
-				updatedField,
-				shapes,
-				A2($author$project$Tetris$addRemovedLinesToScoring, numberOfRemovedLines, score)),
-			$author$project$Tetris$SpawnRandomShape(shapes));
+			_Utils_update(
+				tetris,
+				{playfield: updatedField}),
+			$author$project$Tetris$None);
+	} else {
+		var updatedField = _v0.a;
+		var numberOfRemovedLines = _v0.b.a;
+		var updatedScoringSystem = A2($author$project$ScoringSystem$addRemovedLinesToScoring, numberOfRemovedLines, tetris.scoringSystem);
+		return _Utils_Tuple2(
+			{availableShapes: tetris.availableShapes, playfield: updatedField, scoringSystem: updatedScoringSystem},
+			$author$project$Tetris$SpawnRandomShape(tetris.availableShapes));
 	}
 };
 var $elm$random$Random$constant = function (value) {
@@ -7076,6 +6950,9 @@ var $elm_community$random_extra$Random$List$get = F2(
 		return $elm$core$List$head(
 			A2($elm$core$List$drop, index, list));
 	});
+var $elm$core$Basics$negate = function (n) {
+	return -n;
+};
 var $elm$core$Bitwise$xor = _Bitwise_xor;
 var $elm$random$Random$peel = function (_v0) {
 	var state = _v0.a;
@@ -7159,16 +7036,181 @@ var $author$project$Main$applyGameLoop = function (tetris) {
 		return _Utils_Tuple2(updatedTetris, $elm$core$Platform$Cmd$none);
 	}
 };
-var $author$project$Tetris$applyTetrominoCommand = F2(
-	function (tetrominoCommand, _v0) {
-		var field = _v0.a;
-		var shapes = _v0.b;
-		var score = _v0.c;
-		return A3(
-			$author$project$Tetris$Tetris,
-			A2($author$project$Playfield$applyCommand, tetrominoCommand, field),
-			shapes,
-			score);
+var $author$project$Tetris$TetrominoCommand = function (a) {
+	return {$: 'TetrominoCommand', a: a};
+};
+var $author$project$Tetromino$Drop = {$: 'Drop'};
+var $author$project$Playfield$tryWallKick = F4(
+	function (wallKick, command, tetromino, grid) {
+		var doWallKickFn = function () {
+			if (wallKick.$ === 'LeftWallKick') {
+				var i = wallKick.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (f, g) {
+							return A2($elm$core$Basics$composeL, f, g);
+						}),
+					$author$project$Tetromino$moveTetrominoRight,
+					A2($elm$core$List$repeat, i - 1, $author$project$Tetromino$moveTetrominoRight));
+			} else {
+				var i = wallKick.a;
+				return A3(
+					$elm$core$List$foldl,
+					F2(
+						function (f, g) {
+							return A2($elm$core$Basics$composeL, f, g);
+						}),
+					$author$project$Tetromino$moveTetrominoLeft,
+					A2($elm$core$List$repeat, i - 1, $author$project$Tetromino$moveTetrominoLeft));
+			}
+		}();
+		var updatedTetromino = function () {
+			if (command.$ === 'RotateLeft') {
+				return $author$project$Tetromino$rotateTetrominoLeft;
+			} else {
+				return $author$project$Tetromino$rotateTetrominoRight;
+			}
+		}()(
+			doWallKickFn(tetromino));
+		var _v0 = A2($author$project$Playfield$updateTetrominoPosition, updatedTetromino, grid);
+		if (_v0.$ === 'Just') {
+			var updatedGrid = _v0.a;
+			return A2($author$project$Playfield$Playable, updatedTetromino, updatedGrid);
+		} else {
+			return A2($author$project$Playfield$Playable, tetromino, grid);
+		}
+	});
+var $author$project$Tetromino$LeftWallKick = function (a) {
+	return {$: 'LeftWallKick', a: a};
+};
+var $author$project$Tetromino$RightWallKick = function (a) {
+	return {$: 'RightWallKick', a: a};
+};
+var $author$project$Shape$shapeSize = function (_v0) {
+	var shape = _v0.c;
+	return $elm$core$List$length(shape);
+};
+var $author$project$Tetromino$whichWallKickToAttempt = function (_v0) {
+	var shape = _v0.a;
+	var _v1 = _v0.b;
+	var j = _v1.b;
+	return (j < 0) ? $elm$core$Maybe$Just(
+		$author$project$Tetromino$LeftWallKick(-j)) : (((j + $author$project$Shape$shapeSize(shape)) >= 9) ? $elm$core$Maybe$Just(
+		$author$project$Tetromino$RightWallKick(
+			(j + $author$project$Shape$shapeSize(shape)) - 10)) : $elm$core$Maybe$Nothing);
+};
+var $author$project$Playfield$applyCommand = F2(
+	function (command, field) {
+		switch (field.$) {
+			case 'Playable':
+				var tetromino = field.a;
+				var grid = field.b;
+				return A3($author$project$Playfield$applyCommandOnTetromino, command, tetromino, grid);
+			case 'WaitingForTetromino':
+				return field;
+			default:
+				return field;
+		}
+	});
+var $author$project$Playfield$applyCommandOnTetromino = F3(
+	function (command, tetromino, grid) {
+		var updatedTetromino = A2($author$project$Tetromino$applyCommand, command, tetromino);
+		var possibleGrid = A2(
+			$author$project$Playfield$updateTetrominoPosition,
+			updatedTetromino,
+			A2($author$project$Grid$removeTetromino, tetromino, grid));
+		var _v0 = _Utils_Tuple2(command, possibleGrid);
+		if (_v0.b.$ === 'Nothing') {
+			if (_v0.a.$ === 'Rotate') {
+				var rotateCommand = _v0.a.a;
+				var _v2 = _v0.b;
+				var _v3 = $author$project$Tetromino$whichWallKickToAttempt(tetromino);
+				if (_v3.$ === 'Nothing') {
+					return A2($author$project$Playfield$Playable, tetromino, grid);
+				} else {
+					var wallKick = _v3.a;
+					return A4($author$project$Playfield$tryWallKick, wallKick, rotateCommand, tetromino, grid);
+				}
+			} else {
+				return A2($author$project$Playfield$Playable, tetromino, grid);
+			}
+		} else {
+			switch (_v0.a.$) {
+				case 'Drop':
+					var _v1 = _v0.a;
+					var updatedGrid = _v0.b.a;
+					return A2(
+						$author$project$Playfield$applyCommand,
+						$author$project$Tetromino$Drop,
+						A2($author$project$Playfield$Playable, updatedTetromino, updatedGrid));
+				case 'Rotate':
+					var updatedGrid = _v0.b.a;
+					return A2($author$project$Playfield$Playable, updatedTetromino, updatedGrid);
+				default:
+					var updatedGrid = _v0.b.a;
+					return A2($author$project$Playfield$Playable, updatedTetromino, updatedGrid);
+			}
+		}
+	});
+var $author$project$Playfield$initTetromino = function (shape) {
+	var columnPos = ($author$project$Shape$shapeSize(shape) === 3) ? 4 : 3;
+	return A2(
+		$author$project$Tetromino$Tetromino,
+		shape,
+		_Utils_Tuple2(0, columnPos));
+};
+var $author$project$Playfield$Full = function (a) {
+	return {$: 'Full', a: a};
+};
+var $author$project$Playfield$spawnTetrominoOnGrid = F2(
+	function (tetromino, grid) {
+		return A2($author$project$Playfield$isPossiblePosition, tetromino, grid) ? A2(
+			$author$project$Playfield$Playable,
+			tetromino,
+			A2($author$project$Grid$projectMovingTetromino, tetromino, grid)) : $author$project$Playfield$Full(grid);
+	});
+var $author$project$Playfield$spawnTetromino = F2(
+	function (shape, field) {
+		switch (field.$) {
+			case 'WaitingForTetromino':
+				var grid = field.a;
+				return A2(
+					$author$project$Playfield$spawnTetrominoOnGrid,
+					$author$project$Playfield$initTetromino(shape),
+					grid);
+			case 'Playable':
+				return field;
+			default:
+				return field;
+		}
+	});
+var $author$project$Tetris$applyCommand = F2(
+	function (command, tetris) {
+		switch (command.$) {
+			case 'TetrominoCommand':
+				var tetrominoCommand = command.a;
+				return _Utils_Tuple2(
+					_Utils_update(
+						tetris,
+						{
+							playfield: A2($author$project$Playfield$applyCommand, tetrominoCommand, tetris.playfield)
+						}),
+					$author$project$Tetris$None);
+			case 'FallingDown':
+				return $author$project$Tetris$makePieceFallDown(tetris);
+			default:
+				var _v1 = command.a;
+				var shape = _v1.a;
+				var availableShape = _v1.b;
+				return _Utils_Tuple2(
+					{
+						availableShapes: availableShape,
+						playfield: A2($author$project$Playfield$spawnTetromino, shape, tetris.playfield),
+						scoringSystem: tetris.scoringSystem
+					},
+					$author$project$Tetris$None);
+		}
 	});
 var $author$project$Tetromino$MoveLeft = {$: 'MoveLeft'};
 var $author$project$Tetromino$MoveRight = {$: 'MoveRight'};
@@ -7614,87 +7656,46 @@ var $author$project$Main$applyKeyPress = F2(
 		var _v0 = $author$project$Main$keyToTetrisCommand(rawkey);
 		if (_v0.$ === 'Just') {
 			var command = _v0.a;
-			return A2($author$project$Tetris$applyTetrominoCommand, command, tetris);
+			return A2(
+				$author$project$Tetris$applyCommand,
+				$author$project$Tetris$TetrominoCommand(command),
+				tetris).a;
 		} else {
 			return tetris;
 		}
 	});
-var $elm$core$Tuple$mapFirst = F2(
-	function (func, _v0) {
-		var x = _v0.a;
-		var y = _v0.b;
-		return _Utils_Tuple2(
-			func(x),
-			y);
-	});
 var $author$project$Main$GameOver = function (a) {
 	return {$: 'GameOver', a: a};
 };
-var $author$project$Playfield$Full = {$: 'Full'};
-var $author$project$Playfield$Playable = {$: 'Playable'};
-var $author$project$Playfield$spawnTetromino = F2(
-	function (shape, field) {
-		var columnPos = ($author$project$Shape$shapeSize(shape) === 3) ? 4 : 3;
-		var tetromino = A2(
-			$author$project$Tetromino$Tetromino,
-			shape,
-			_Utils_Tuple2(0, columnPos));
-		return A2($author$project$Playfield$isPossiblePosition, tetromino, field) ? _Utils_Tuple2(
-			A3(
-				$author$project$Playfield$projectTetrominoToGrid,
-				$author$project$Playfield$Moving(
-					$author$project$Tetromino$getColor(tetromino)),
-				tetromino,
-				field),
-			$author$project$Playfield$Playable) : _Utils_Tuple2(
-			A3(
-				$author$project$Playfield$projectTetrominoToGrid,
-				$author$project$Playfield$Fixed(
-					$author$project$Tetromino$getColor(tetromino)),
-				tetromino,
-				field),
-			$author$project$Playfield$Full);
-	});
-var $author$project$Tetris$spawnTetromino = F3(
-	function (shape, availableShapes, _v0) {
-		var field = _v0.a;
-		var score = _v0.c;
-		var _v1 = A2($author$project$Playfield$spawnTetromino, shape, field);
-		if (_v1.b.$ === 'Full') {
-			var updatedField = _v1.a;
-			var _v2 = _v1.b;
-			return _Utils_Tuple2(
-				A3($author$project$Tetris$Tetris, updatedField, availableShapes, score),
-				$author$project$Playfield$Full);
-		} else {
-			var updatedField = _v1.a;
-			var _v3 = _v1.b;
-			return _Utils_Tuple2(
-				A3($author$project$Tetris$Tetris, updatedField, availableShapes, score),
-				$author$project$Playfield$Playable);
-		}
-	});
+var $author$project$Tetris$SpawningTetromino = function (a) {
+	return {$: 'SpawningTetromino', a: a};
+};
+var $author$project$Tetris$isGameOver = function (_v0) {
+	var playfield = _v0.playfield;
+	if (playfield.$ === 'Full') {
+		return true;
+	} else {
+		return false;
+	}
+};
 var $author$project$Main$spawnTetromino = F3(
 	function (shape, availableShapes, tetris) {
-		var _v0 = A3($author$project$Tetris$spawnTetromino, shape, availableShapes, tetris);
-		if (_v0.b.$ === 'Full') {
-			var updatedTetris = _v0.a;
-			var _v1 = _v0.b;
-			return _Utils_Tuple2(
-				$author$project$Main$GameOver(updatedTetris),
-				$elm$core$Platform$Cmd$none);
-		} else {
-			var updatedTetris = _v0.a;
-			var _v2 = _v0.b;
-			return _Utils_Tuple2(
-				$author$project$Main$Playing(updatedTetris),
-				$elm$core$Platform$Cmd$none);
-		}
+		var _v0 = A2(
+			$author$project$Tetris$applyCommand,
+			$author$project$Tetris$SpawningTetromino(
+				_Utils_Tuple2(shape, availableShapes)),
+			tetris);
+		var updatedTetris = _v0.a;
+		return $author$project$Tetris$isGameOver(updatedTetris) ? _Utils_Tuple2(
+			$author$project$Main$GameOver(updatedTetris),
+			$elm$core$Platform$Cmd$none) : _Utils_Tuple2(
+			$author$project$Main$Playing(updatedTetris),
+			$elm$core$Platform$Cmd$none);
 	});
-var $author$project$Playfield$createGrid = A2($elm$core$Array$repeat, 22, $author$project$Playfield$createRow);
-var $author$project$Playfield$createPlayfield = A2($author$project$Playfield$PlayField, $elm$core$Maybe$Nothing, $author$project$Playfield$createGrid);
-var $author$project$Tetris$initScoring = A3($author$project$Tetris$Scoring, 0, 1, 0);
-var $author$project$Tetris$startTetris = A3($author$project$Tetris$Tetris, $author$project$Playfield$createPlayfield, $author$project$Shape$allShapes, $author$project$Tetris$initScoring);
+var $author$project$Playfield$createGrid = A2($elm$core$Array$repeat, 22, $author$project$Grid$createRow);
+var $author$project$Playfield$createPlayfield = $author$project$Playfield$WaitingForTetromino($author$project$Playfield$createGrid);
+var $author$project$ScoringSystem$initScoring = A3($author$project$ScoringSystem$ScoringSystem, 0, 1, 0);
+var $author$project$Tetris$startTetris = {availableShapes: $author$project$Shape$allShapes, playfield: $author$project$Playfield$createPlayfield, scoringSystem: $author$project$ScoringSystem$initScoring};
 var $author$project$Main$update = F2(
 	function (msg, model) {
 		if (msg.$ === 'StartGame') {
@@ -10075,15 +10076,6 @@ var $author$project$Main$displayGrid = function (grid) {
 				2,
 				$elm$core$Array$toList(grid))));
 };
-var $elm$core$Debug$toString = _Debug_toString;
-var $author$project$Tetris$levelToString = function (_v0) {
-	var level = _v0.b;
-	return $elm$core$Debug$toString(level);
-};
-var $author$project$Tetris$scoreToString = function (_v0) {
-	var score = _v0.a;
-	return $elm$core$Debug$toString(score);
-};
 var $rtfeldman$elm_css$VirtualDom$Styled$Unstyled = function (a) {
 	return {$: 'Unstyled', a: a};
 };
@@ -10115,7 +10107,7 @@ var $author$project$Main$displayScore = function (scoring) {
 				_List_fromArray(
 					[
 						$rtfeldman$elm_css$Html$Styled$text(
-						'Level ' + $author$project$Tetris$levelToString(scoring))
+						'Level ' + $elm$core$String$fromInt(scoring.level))
 					])),
 				A2(
 				$rtfeldman$elm_css$Html$Styled$div,
@@ -10133,7 +10125,7 @@ var $author$project$Main$displayScore = function (scoring) {
 				_List_fromArray(
 					[
 						$rtfeldman$elm_css$Html$Styled$text(
-						'Score ' + $author$project$Tetris$scoreToString(scoring))
+						'Score ' + $elm$core$String$fromInt(scoring.score))
 					]))
 			]));
 };
@@ -10173,17 +10165,18 @@ var $rtfeldman$elm_css$Html$Styled$Events$onClick = function (msg) {
 		'click',
 		$elm$json$Json$Decode$succeed(msg));
 };
-var $author$project$Tetris$retrieveField = function (_v0) {
-	var field = _v0.a;
-	return field;
-};
-var $author$project$Playfield$retrieveGrid = function (_v0) {
-	var grid = _v0.b;
-	return grid;
-};
-var $author$project$Tetris$retrieveScore = function (_v0) {
-	var scoring = _v0.c;
-	return scoring;
+var $author$project$Playfield$retrieveGrid = function (field) {
+	switch (field.$) {
+		case 'WaitingForTetromino':
+			var grid = field.a;
+			return grid;
+		case 'Playable':
+			var grid = field.b;
+			return grid;
+		default:
+			var grid = field.a;
+			return grid;
+	}
 };
 var $rtfeldman$elm_css$Css$spaceAround = $rtfeldman$elm_css$Css$prop1('space-around');
 var $rtfeldman$elm_css$Css$textAlign = function (fn) {
@@ -10216,8 +10209,7 @@ var $author$project$Main$buildTetris = F2(
 					_List_fromArray(
 						[
 							$author$project$Main$displayGrid(
-							$author$project$Playfield$retrieveGrid(
-								$author$project$Tetris$retrieveField(tetris)))
+							$author$project$Playfield$retrieveGrid(tetris.playfield))
 						])),
 					A2(
 					$rtfeldman$elm_css$Html$Styled$div,
@@ -10256,8 +10248,7 @@ var $author$project$Main$buildTetris = F2(
 							_List_Nil,
 							_List_fromArray(
 								[
-									$author$project$Main$displayScore(
-									$author$project$Tetris$retrieveScore(tetris))
+									$author$project$Main$displayScore(tetris.scoringSystem)
 								])),
 							A2(
 							$author$project$Main$btn,
