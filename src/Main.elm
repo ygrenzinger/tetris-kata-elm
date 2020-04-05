@@ -19,7 +19,7 @@ import Random
 import ScoringSystem exposing (ScoringSystem)
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
 import String exposing (fromInt)
-import Tetris as T exposing (SpawnCommand(..), Tetris, isGameOver, timeSpentInRow)
+import Tetris as T exposing (SpawnCommand(..), Tetris, TetrisCommmand(..), isGameOver, timeSpentInRow)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
@@ -102,8 +102,8 @@ update msg model =
 spawnTetromino : TetrominoShape -> List TetrominoShape -> Tetris -> ( Model, Cmd Msg )
 spawnTetromino shape availableShapes tetris =
     let
-        updatedTetris =
-            T.spawnTetromino shape availableShapes tetris
+        ( updatedTetris, _ ) =
+            T.applyCommand (SpawningTetromino ( shape, availableShapes )) tetris
     in
     if isGameOver updatedTetris then
         ( GameOver updatedTetris, Cmd.none )
@@ -126,7 +126,7 @@ applyKeyPress : Tetris -> RawKey -> Tetris
 applyKeyPress tetris rawkey =
     case keyToTetrisCommand rawkey of
         Just command ->
-            T.applyTetrominoCommand command tetris
+            Tuple.first <| T.applyCommand (TetrominoCommand command) tetris
 
         _ ->
             tetris

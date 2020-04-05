@@ -7,17 +7,23 @@ import Tetromino exposing (TetrominoCommand(..))
 
 
 type alias Tetris =
-    { playfield : Playfield, availableShape : List TetrominoShape, scoringSystem : ScoringSystem }
+    { playfield : Playfield, availableShapes : List TetrominoShape, scoringSystem : ScoringSystem }
 
 
 type SpawnCommand
     = SpawnRandomShape (List TetrominoShape)
-    | Keep
+    | None
+
+
+type TetrisCommmand
+    = TetrominoCommand TetrominoCommand
+    | SpawningTetromino ( TetrominoShape, List TetrominoShape )
+    | FallingDown
 
 
 startTetris : Tetris
 startTetris =
-    { playfield = P.createPlayfield, availableShape = allShapes, scoringSystem = initScoring }
+    { playfield = P.createPlayfield, availableShapes = allShapes, scoringSystem = initScoring }
 
 
 isGameOver : Tetris -> Bool
@@ -35,25 +41,28 @@ timeSpentInRow { scoringSystem } =
     (0.8 - ((toFloat scoringSystem.level - 1) * 0.007)) ^ (toFloat scoringSystem.level - 1) * 1000
 
 
-applyTetrominoCommand : TetrominoCommand -> Tetris -> Tetris
-applyTetrominoCommand tetrominoCommand tetris =
-    { tetris | playfield = P.applyCommand tetrominoCommand tetris.playfield }
+applyCommand : TetrisCommmand -> Tetris -> ( Tetris, SpawnCommand )
+applyCommand command tetris =
+    case command of
+        TetrominoCommand tetrominoCommand ->
+            ( { tetris | playfield = P.applyCommand tetrominoCommand tetris.playfield }, None )
+
+        FallingDown ->
+            makePieceFallDown tetris
+
+        SpawningTetromino ( shape, availableShape ) ->
+            ( { playfield = P.spawnTetromino shape tetris.playfield, availableShapes = availableShape, scoringSystem = tetris.scoringSystem }, None )
 
 
 makePieceFallDown : Tetris -> ( Tetris, SpawnCommand )
 makePieceFallDown tetris =
     case P.makeTetrominoFallDown tetris.playfield of
         ( updatedField, Nothing ) ->
-            ( { tetris | playfield = updatedField }, Keep )
+            ( { tetris | playfield = updatedField }, None )
 
         ( updatedField, Just numberOfRemovedLines ) ->
             let
                 updatedScoringSystem =
                     addRemovedLinesToScoring numberOfRemovedLines tetris.scoringSystem
             in
-            ( { playfield = updatedField, availableShape = tetris.availableShape, scoringSystem = updatedScoringSystem }, SpawnRandomShape tetris.availableShape )
-
-
-spawnTetromino : TetrominoShape -> List TetrominoShape -> Tetris -> Tetris
-spawnTetromino shape availableShapes tetris =
-    { playfield = P.spawnTetromino shape tetris.playfield, availableShape = availableShapes, scoringSystem = tetris.scoringSystem }
+            ( { playfield = updatedField, availableShapes = tetris.availableShapes, scoringSystem = updatedScoringSystem }, SpawnRandomShape tetris.availableShapes )
