@@ -8,7 +8,7 @@ import Grid exposing (isRowFull)
 import Playfield exposing (PlayfieldState(..), retrieveGrid)
 import Shape exposing (shapeO)
 import Test exposing (Test, describe, fuzzWith)
-import Tetris exposing (Tetris, retrieveField, spawnTetromino, startTetris)
+import Tetris exposing (Tetris, spawnTetromino, startTetris)
 
 
 suite : Test
@@ -28,7 +28,7 @@ suite =
 
                     hasNoFullRow : Tetris -> Bool
                     hasNoFullRow =
-                        \t -> not <| List.any isRowFull (retrieveField t |> retrieveGrid |> Array.toList)
+                        \t -> not <| List.any isRowFull (t.playfield |> retrieveGrid |> Array.toList)
                 in
                 Expect.true "Should have no full row" (hasNoFullRow tetris)
         ]
