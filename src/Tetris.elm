@@ -1,25 +1,9 @@
 module Tetris exposing (..)
 
-import Debug exposing (toString)
 import Playfield as P exposing (PlayField, PlayFieldState(..))
+import ScoringSystem exposing (ScoringSystem(..), addRemovedLinesToScoring, initScoring)
 import Shape exposing (Shape, TetrominoShape, allShapes)
 import Tetromino exposing (TetrominoCommand(..))
-
-
-type alias Score =
-    Int
-
-
-type alias Level =
-    Int
-
-
-type alias Counter =
-    Int
-
-
-type ScoringSystem
-    = Scoring Score Level Counter
 
 
 type alias AvailableShape =
@@ -45,76 +29,13 @@ startTetris =
     Tetris P.createPlayfield allShapes initScoring
 
 
-initScoring : ScoringSystem
-initScoring =
-    Scoring 0 1 0
-
-
-scoreToString : ScoringSystem -> String
-scoreToString (Scoring score _ _) =
-    toString score
-
-
-levelToString : ScoringSystem -> String
-levelToString (Scoring _ level _) =
-    toString level
-
-
-addRemovedLinesToScoring : Int -> ScoringSystem -> ScoringSystem
-addRemovedLinesToScoring numberOfRemovedLines (Scoring score level counter) =
-    let
-        updatedCounter =
-            counter
-                + (case numberOfRemovedLines of
-                    1 ->
-                        1
-
-                    2 ->
-                        3
-
-                    3 ->
-                        5
-
-                    4 ->
-                        8
-
-                    _ ->
-                        0
-                  )
-
-        scoreByLines =
-            case numberOfRemovedLines of
-                1 ->
-                    40
-
-                2 ->
-                    100
-
-                3 ->
-                    300
-
-                4 ->
-                    1200
-
-                _ ->
-                    0
-
-        updatedScore =
-            score + (scoreByLines * level)
-
-        updatedLevel =
-            floor (toFloat updatedCounter / (5 * toFloat level)) + 1
-    in
-    Scoring updatedScore updatedLevel updatedCounter
-
-
 retrieveScore : Tetris -> ScoringSystem
 retrieveScore (Tetris _ _ scoring) =
     scoring
 
 
 timeSpentInRow : Tetris -> Float
-timeSpentInRow (Tetris _ _ (Scoring _ level _)) =
+timeSpentInRow (Tetris _ _ (ScoringSystem _ level _)) =
     (0.8 - ((toFloat level - 1) * 0.007)) ^ (toFloat level - 1) * 1000
 
 

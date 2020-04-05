@@ -10,14 +10,15 @@ import Array
 import Browser exposing (Document)
 import Css exposing (..)
 import Grid exposing (Cell(..), Grid, Row)
-import Html.Styled exposing (Attribute, Html, button, div, header, nav, span, styled, text, toUnstyled)
+import Html.Styled exposing (Attribute, Html, button, div, styled, text, toUnstyled)
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
 import Playfield exposing (PlayField, PlayFieldState(..), retrieveGrid)
 import Random
+import ScoringSystem exposing (ScoringSystem, levelToString, scoreToString)
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
-import Tetris as T exposing (ScoringSystem, SpawnCommand(..), Tetris(..), levelToString, retrieveScore, scoreToString, timeSpentInRow)
+import Tetris as T exposing (SpawnCommand(..), Tetris(..), retrieveScore, timeSpentInRow)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
