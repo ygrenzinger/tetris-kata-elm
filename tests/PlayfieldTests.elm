@@ -20,17 +20,17 @@ updateGrid cell positions grid =
     List.foldl (setCellState cell) grid positions
 
 
-countMovingCell : ( Int, Int ) -> ( Int, Int ) -> PlayField -> Int
+countMovingCell : ( Int, Int ) -> ( Int, Int ) -> Playfield -> Int
 countMovingCell rowRange columnRange =
     countCellAtState isMovingCell (buildPositions rowRange columnRange) << retrieveGrid
 
 
-createPlayFieldWithShape : TetrominoShape -> PlayField
+createPlayFieldWithShape : TetrominoShape -> Playfield
 createPlayFieldWithShape shape =
     createPlayfield |> spawnTetromino shape |> Tuple.first
 
 
-makeTetrominoFallDownUntilBlocked : PlayField -> ( PlayField, Maybe Int )
+makeTetrominoFallDownUntilBlocked : Playfield -> ( Playfield, Maybe Int )
 makeTetrominoFallDownUntilBlocked playfield =
     applyCommand Drop playfield |> makeTetrominoFallDown
 
@@ -121,7 +121,7 @@ suite =
                             |> updateGrid (Fixed "000000") (buildPositions ( 20, 21 ) ( 0, 9 ))
 
                     ( originalField, _ ) =
-                        PlayField Nothing grid |> spawnTetromino shapeO
+                        Playfield Nothing grid |> spawnTetromino shapeO
 
                     field =
                         List.foldl applyCommand originalField (List.repeat 20 (Move MoveDown))
@@ -149,7 +149,7 @@ suite =
                             |> updateGrid Empty (buildPositions ( 19, 21 ) ( 4, 5 ))
 
                     ( originalField, _ ) =
-                        PlayField Nothing grid |> spawnTetromino shapeO
+                        Playfield Nothing grid |> spawnTetromino shapeO
 
                     ( field, removedLines ) =
                         makeTetrominoFallDownUntilBlocked originalField

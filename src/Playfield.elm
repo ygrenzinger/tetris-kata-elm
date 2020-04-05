@@ -6,11 +6,11 @@ import Shape exposing (Shape, ShapeColor, TetrominoShape, shapeSize)
 import Tetromino as T exposing (MoveCommand(..), Tetromino(..), TetrominoCommand(..))
 
 
-type PlayField
-    = PlayField (Maybe Tetromino) Grid
+type Playfield
+    = Playfield (Maybe Tetromino) Grid
 
 
-type PlayFieldState
+type PlayfieldState
     = Playable
     | Full
 
@@ -20,22 +20,22 @@ createGrid =
     Array.repeat 22 createRow
 
 
-createPlayfield : PlayField
+createPlayfield : Playfield
 createPlayfield =
-    PlayField Nothing createGrid
+    Playfield Nothing createGrid
 
 
-retrieveGrid : PlayField -> Grid
-retrieveGrid (PlayField _ grid) =
+retrieveGrid : Playfield -> Grid
+retrieveGrid (Playfield _ grid) =
     grid
 
 
-isPossiblePosition : Tetromino -> PlayField -> Bool
+isPossiblePosition : Tetromino -> Playfield -> Bool
 isPossiblePosition tetromino field =
     countCellAtState (\c -> isEmptyCell c || isMovingCell c) (T.positions tetromino) (retrieveGrid field) == 4
 
 
-spawnTetromino : TetrominoShape -> PlayField -> ( PlayField, PlayFieldState )
+spawnTetromino : TetrominoShape -> Playfield -> ( Playfield, PlayfieldState )
 spawnTetromino shape field =
     let
         columnPos =
@@ -55,17 +55,17 @@ spawnTetromino shape field =
         ( fixTetromino field, Full )
 
 
-applyCommand : TetrominoCommand -> PlayField -> PlayField
+applyCommand : TetrominoCommand -> Playfield -> Playfield
 applyCommand command playfield =
     case playfield of
-        PlayField (Just tetromino) _ ->
+        Playfield (Just tetromino) _ ->
             applyCommandOnTetromino command tetromino playfield
 
-        (PlayField Nothing _) as p ->
+        (Playfield Nothing _) as p ->
             p
 
 
-applyCommandOnTetromino : TetrominoCommand -> Tetromino -> PlayField -> PlayField
+applyCommandOnTetromino : TetrominoCommand -> Tetromino -> Playfield -> Playfield
 applyCommandOnTetromino command tetromino playfield =
     let
         updatedTetromino =
@@ -93,7 +93,7 @@ applyCommandOnTetromino command tetromino playfield =
             playfield
 
 
-tryWallKick : T.WallKick -> T.RotateCommand -> Tetromino -> PlayField -> PlayField
+tryWallKick : T.WallKick -> T.RotateCommand -> Tetromino -> Playfield -> Playfield
 tryWallKick wallKick command tetromino playfield =
     let
         doWallKickFn : Tetromino -> Tetromino
@@ -123,20 +123,20 @@ tryWallKick wallKick command tetromino playfield =
             playfield
 
 
-makeTetrominoFallDown : PlayField -> ( PlayField, Maybe Int )
-makeTetrominoFallDown (PlayField tetromino grid) =
+makeTetrominoFallDown : Playfield -> ( Playfield, Maybe Int )
+makeTetrominoFallDown (Playfield tetromino grid) =
     case tetromino of
         Nothing ->
-            ( PlayField tetromino grid, Nothing )
+            ( Playfield tetromino grid, Nothing )
 
         Just t ->
-            tetrominoFallDown t (PlayField tetromino grid)
+            tetrominoFallDown t (Playfield tetromino grid)
 
 
-tetrominoFallDown : Tetromino -> PlayField -> ( PlayField, Maybe Int )
+tetrominoFallDown : Tetromino -> Playfield -> ( Playfield, Maybe Int )
 tetrominoFallDown tetromino playfield =
     let
-        (PlayField updatedTetromino updatedGrid) =
+        (Playfield updatedTetromino updatedGrid) =
             applyCommand (Move MoveDown) playfield
     in
     if Maybe.map (T.samePosition tetromino) updatedTetromino |> Maybe.withDefault False then
@@ -145,35 +145,35 @@ tetrominoFallDown tetromino playfield =
             |> Tuple.mapSecond Just
 
     else
-        ( PlayField updatedTetromino updatedGrid, Nothing )
+        ( Playfield updatedTetromino updatedGrid, Nothing )
 
 
-removeTetromino : PlayField -> PlayField
-removeTetromino (PlayField tetromino grid) =
+removeTetromino : Playfield -> Playfield
+removeTetromino (Playfield tetromino grid) =
     case tetromino of
         Nothing ->
-            PlayField Nothing grid
+            Playfield Nothing grid
 
         Just t ->
-            PlayField Nothing <| projectPositions Empty (T.positions t) grid
+            Playfield Nothing <| projectPositions Empty (T.positions t) grid
 
 
-projectMovingTetromino : Tetromino -> PlayField -> PlayField
-projectMovingTetromino tetromino (PlayField _ grid) =
-    PlayField (Just tetromino) <| projectPositions (Moving (T.getColor tetromino)) (T.positions tetromino) grid
+projectMovingTetromino : Tetromino -> Playfield -> Playfield
+projectMovingTetromino tetromino (Playfield _ grid) =
+    Playfield (Just tetromino) <| projectPositions (Moving (T.getColor tetromino)) (T.positions tetromino) grid
 
 
-fixTetromino : PlayField -> PlayField
-fixTetromino (PlayField tetromino grid) =
+fixTetromino : Playfield -> Playfield
+fixTetromino (Playfield tetromino grid) =
     case tetromino of
         Nothing ->
-            PlayField Nothing grid
+            Playfield Nothing grid
 
         Just t ->
-            PlayField Nothing <| projectPositions (Fixed (T.getColor t)) (T.positions t) grid
+            Playfield Nothing <| projectPositions (Fixed (T.getColor t)) (T.positions t) grid
 
 
-updateTetrominoPosition : Tetromino -> PlayField -> Maybe PlayField
+updateTetrominoPosition : Tetromino -> Playfield -> Maybe Playfield
 updateTetrominoPosition updatedTetromino field =
     if isPossiblePosition updatedTetromino field then
         Just <| projectMovingTetromino updatedTetromino <| removeTetromino field
@@ -182,6 +182,6 @@ updateTetrominoPosition updatedTetromino field =
         Nothing
 
 
-cleanFullLinesAndRemoveTetromino : PlayField -> ( PlayField, Int )
-cleanFullLinesAndRemoveTetromino (PlayField _ grid) =
-    cleanFullLines grid |> Tuple.mapFirst (PlayField Nothing)
+cleanFullLinesAndRemoveTetromino : Playfield -> ( Playfield, Int )
+cleanFullLinesAndRemoveTetromino (Playfield _ grid) =
+    cleanFullLines grid |> Tuple.mapFirst (Playfield Nothing)

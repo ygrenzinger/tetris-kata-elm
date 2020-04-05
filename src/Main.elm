@@ -14,7 +14,7 @@ import Html.Styled exposing (Attribute, Html, button, div, styled, text, toUnsty
 import Html.Styled.Attributes exposing (css)
 import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
-import Playfield exposing (PlayField, PlayFieldState(..), retrieveGrid)
+import Playfield exposing (Playfield, PlayfieldState(..), retrieveGrid)
 import Random
 import ScoringSystem exposing (ScoringSystem, levelToString, scoreToString)
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
