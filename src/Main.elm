@@ -16,9 +16,10 @@ import Html.Styled.Events exposing (onClick)
 import Keyboard exposing (Key(..), KeyChange(..), RawKey)
 import Playfield exposing (Playfield, PlayfieldState(..), retrieveGrid)
 import Random
-import ScoringSystem exposing (ScoringSystem, levelToString, scoreToString)
+import ScoringSystem exposing (ScoringSystem)
 import Shape exposing (Shape, TetrominoShape, allShapes, randomShapeGenerator)
-import Tetris as T exposing (SpawnCommand(..), Tetris(..), retrieveScore, timeSpentInRow)
+import String exposing (fromInt)
+import Tetris as T exposing (SpawnCommand(..), Tetris, timeSpentInRow)
 import Tetromino exposing (MoveCommand(..), RotateCommand(..), TetrominoCommand(..))
 import Time
 
@@ -246,13 +247,13 @@ displayScore scoring =
                 [ padding2 (px 10) (px 0)
                 ]
             ]
-            [ text ("Level " ++ levelToString scoring) ]
+            [ text ("Level " ++ fromInt scoring.level) ]
         , div
             [ css
                 [ padding2 (px 5) (px 0)
                 ]
             ]
-            [ text ("Score " ++ scoreToString scoring) ]
+            [ text ("Score " ++ fromInt scoring.score) ]
         ]
 
 
@@ -267,7 +268,7 @@ buildTetris title tetris =
         ]
         [ div
             []
-            [ T.retrieveField tetris |> retrieveGrid |> displayGrid ]
+            [ tetris.playfield |> retrieveGrid |> displayGrid ]
         , div
             [ css
                 [ textAlign center
@@ -281,7 +282,7 @@ buildTetris title tetris =
                     ]
                 ]
                 [ text title ]
-            , div [] [ displayScore (retrieveScore tetris) ]
+            , div [] [ displayScore tetris.scoringSystem ]
             , btn [ onClick StartGame ] [ text "restart game" ]
             ]
         ]

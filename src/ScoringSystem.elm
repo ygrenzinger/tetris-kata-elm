@@ -1,7 +1,5 @@
 module ScoringSystem exposing (..)
 
-import String exposing (fromInt)
-
 
 type alias Score =
     Int
@@ -25,16 +23,6 @@ type alias ScoringSystem =
 initScoring : ScoringSystem
 initScoring =
     ScoringSystem 0 1 0
-
-
-scoreToString : ScoringSystem -> String
-scoreToString { score } =
-    fromInt score
-
-
-levelToString : ScoringSystem -> String
-levelToString { level } =
-    fromInt level
 
 
 addRemovedLinesToScoring : Int -> ScoringSystem -> ScoringSystem
