@@ -6,7 +6,6 @@ import Fuzz exposing (list)
 import Fuzzing exposing (fuzzTetrisAction)
 import Grid exposing (isRowFull)
 import Playfield exposing (retrieveGrid)
-import ScoringSystem exposing (ScoringSystem)
 import Shape exposing (shapeO)
 import Test exposing (Test, describe, fuzzWith)
 import Tetris exposing (SpawnCommand(..), Tetris, TetrisCommmand(..), applyCommand, startTetris)
@@ -15,7 +14,7 @@ import Tetris exposing (SpawnCommand(..), Tetris, TetrisCommmand(..), applyComma
 suite : Test
 suite =
     describe "Score and level mechanics"
-        [ fuzzWith { runs = 1000 } (list fuzzTetrisAction) "At any moment of a Tetris game, there should be no full row" <|
+        [ fuzzWith { runs = 100 } (list fuzzTetrisAction) "At any moment of a Tetris game, there should be no full row" <|
             -- Clearly not the best property based test out there but trying :)
             \actions ->
                 let

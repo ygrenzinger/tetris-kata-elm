@@ -1,7 +1,7 @@
-module TetrisTests exposing (..)
+module ScoringSystemTests exposing (..)
 
 import Expect
-import ScoringSystem exposing (ScoringSystem(..), addRemovedLinesToScoring, initScoring)
+import ScoringSystem exposing (ScoringSystem, addRemovedLinesToScoring, initScoring)
 import Test exposing (Test, describe, test)
 
 
@@ -14,10 +14,10 @@ suite =
                     originalScore =
                         ScoringSystem 0 1 0
 
-                    (ScoringSystem _ level _) =
+                    scoringSystem =
                         addRemovedLinesToScoring 4 originalScore
                 in
-                Expect.equal 2 level
+                Expect.equal 2 scoringSystem.level
         , test "Increase scoring system" <|
             \_ ->
                 let
