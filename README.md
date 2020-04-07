@@ -9,5 +9,6 @@ The left and right wall kicks are implemented but not the full rules of the Supe
 Implementing a full tetris is harder than you think :)
 
 I have also tried to mix some Property Based Testing.
+Interesting article about PBT aka Fuzzing in Elm https://elmprogramming.com/fuzz-testing.html
 
 **Any feedback on this Elm implementation is welcome**
